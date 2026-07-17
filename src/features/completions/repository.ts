@@ -26,7 +26,7 @@ export function createCompletionRepository(db: LittleThingsDB = getDb()): Comple
     },
     async getByHabit(habitId) {
       const rows = await db.completions.where('habitId').equals(habitId).toArray();
-      return rows.filter((c) => !c.deletedAt);
+      return rows.filter((c) => !c.deletedAt).sort((a, b) => a.date.localeCompare(b.date));
     },
     async getByHabitAndDate(habitId, date) {
       const row = await db.completions.where('[habitId+date]').equals([habitId, date]).first();
@@ -41,7 +41,9 @@ export function createCompletionRepository(db: LittleThingsDB = getDb()): Comple
     },
     async getByHabitInRange(habitId, start, end) {
       const rows = await db.completions.where('habitId').equals(habitId).toArray();
-      return rows.filter((c) => !c.deletedAt && c.date >= start && c.date <= end);
+      return rows
+        .filter((c) => !c.deletedAt && c.date >= start && c.date <= end)
+        .sort((a, b) => a.date.localeCompare(b.date));
     },
     async put(completion) {
       await db.completions.put(completion);

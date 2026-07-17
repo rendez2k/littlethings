@@ -143,3 +143,13 @@ export const habitDraftSchema = z.object({
   endDate: dateKeySchema.nullable().optional(),
 });
 export type HabitDraft = z.infer<typeof habitDraftSchema>;
+
+/**
+ * Form-facing schema: HTML date inputs yield '' when cleared, so we coerce an
+ * empty end date to `null` before validation.
+ */
+export const habitFormSchema = habitDraftSchema.extend({
+  endDate: z.preprocess((v) => (v === '' || v === undefined ? null : v), dateKeySchema.nullable()),
+  notes: z.preprocess((v) => (v === '' ? undefined : v), z.string().max(1000).optional()),
+});
+export type HabitFormValues = z.infer<typeof habitFormSchema>;

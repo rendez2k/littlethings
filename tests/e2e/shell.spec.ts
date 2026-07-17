@@ -7,7 +7,8 @@ import { expect, test } from '@playwright/test';
  */
 test('bottom navigation moves between the four destinations', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1, name: 'Today' })).toBeVisible();
+  // A fresh install shows the welcome state on Today.
+  await expect(page.getByRole('heading', { name: 'Build better days.' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Habits' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Habits' })).toBeVisible();
@@ -17,6 +18,9 @@ test('bottom navigation moves between the four destinations', async ({ page }) =
 
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Today' }).click();
+  await expect(page.getByRole('heading', { name: 'Build better days.' })).toBeVisible();
 });
 
 test('theme and palette selections persist across reload', async ({ page }) => {
