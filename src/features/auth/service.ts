@@ -1,5 +1,6 @@
 import type { Session, User } from '@supabase/supabase-js';
 import { getSupabaseClient } from '@/lib/supabase/client';
+import { looksLikeEmail } from './schemas';
 
 export interface AuthResult {
   ok: boolean;
@@ -16,9 +17,16 @@ export function usernameOf(user: User | null | undefined): string | null {
 
 function friendlyError(message: string): string {
   const m = message.toLowerCase();
-  if (m.includes('invalid login credentials')) return 'That email or password is incorrect.';
+  if (m.includes('invalid login credentials')) {
+    return 'That email/username or password is incorrect.';
+  }
   if (m.includes('already registered') || m.includes('already been registered')) {
     return 'An account with this email already exists. Try signing in instead.';
+  }
+  // The profiles trigger raises a unique-violation when a username is taken,
+  // which Supabase surfaces as a generic "database error saving new user".
+  if (m.includes('database error saving new user') || m.includes('duplicate key')) {
+    return 'That username is already taken. Please choose another.';
   }
   if (m.includes('email not confirmed')) {
     return 'Please confirm your email address, then sign in.';
@@ -27,6 +35,19 @@ function friendlyError(message: string): string {
     return 'Too many attempts. Please wait a moment and try again.';
   }
   return message;
+}
+
+/**
+ * Resolve a username to its account email via the `email_for_username` RPC.
+ * Returns null if the RPC is not installed yet or no match exists, so callers
+ * can fall back to a friendly "not found" message.
+ */
+async function resolveEmailForUsername(username: string): Promise<string | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase.rpc('email_for_username', { uname: username });
+  if (error || typeof data !== 'string' || data.length === 0) return null;
+  return data;
 }
 
 export async function signUp(
@@ -51,9 +72,25 @@ export async function signUp(
   return { ok: true };
 }
 
-export async function signIn(email: string, password: string): Promise<AuthResult> {
+/**
+ * Sign in with either an email address or a username. Usernames are resolved to
+ * their email via an RPC before Supabase's email/password sign-in.
+ */
+export async function signIn(identifier: string, password: string): Promise<AuthResult> {
   const supabase = getSupabaseClient();
   if (!supabase) return { ok: false, message: 'Accounts are not configured for this app.' };
+
+  let email = identifier.trim();
+  if (!looksLikeEmail(email)) {
+    const resolved = await resolveEmailForUsername(email);
+    if (!resolved) {
+      return {
+        ok: false,
+        message: "We couldn't find an account with that username. Try your email instead.",
+      };
+    }
+    email = resolved;
+  }
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ok: false, message: friendlyError(error.message) };

@@ -38,12 +38,18 @@ A running log of notable decisions. Keep entries short.
   automatically. No server session/cookie plumbing is required for v1.
 - **Only the publishable (anon) key ships to the client.** Read from
   `NEXT_PUBLIC_SUPABASE_*`. The service-role key must never be added here.
-- **Username at sign-up is stored in user metadata**, not a separate table, so no
-  database schema/RLS setup is required to get accounts working with just the
-  anon key. Sign-in uses email + password (Supabase's native flow); the username
-  is shown on the account screen.
-  - _Follow-up:_ true "log in with username" needs a `profiles` table plus an
-    RPC that maps username → email (or a server route). That requires DB/RLS
-    setup in the Supabase project and is intentionally deferred.
+- **Username + email login.** Sign-up captures username + email + password; the
+  username is stored both in user metadata and in a `profiles` table. Sign-in
+  accepts either an email or a username — usernames are resolved to their email
+  via a `SECURITY DEFINER` RPC (`email_for_username`) before Supabase's native
+  email/password sign-in.
+  - The `profiles` table, its RLS policies, the new-user trigger and the RPC
+    live in `supabase/migrations/0001_username_login.sql`, run once in the
+    Supabase SQL editor. It can't be applied from the app with only the anon key.
+  - **Graceful degradation:** with the env vars set but the migration not yet
+    run, email sign-up/sign-in still work; username sign-in returns a clear
+    "couldn't find that username" message and username uniqueness isn't enforced.
+  - The RPC only returns an email for an _exact_ username match (no user
+    enumeration/listing).
 - **Graceful when unconfigured.** If the env vars are absent, the Supabase client
   is `null` and the Account screen shows the local-only state instead of forms.

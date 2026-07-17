@@ -48,6 +48,20 @@ service-role key here — it would be exposed in the browser bundle.
 
 If these are unset, the Account screen simply shows the local-only experience.
 
+#### Enable username login (one-time SQL)
+
+Email sign-up and sign-in work as soon as the env vars are set. To also allow
+**unique usernames** and **signing in with a username**, run the migration once:
+
+Supabase Dashboard → **SQL Editor** → New query → paste the contents of
+[`supabase/migrations/0001_username_login.sql`](supabase/migrations/0001_username_login.sql)
+→ **Run**.
+
+It creates a `profiles` table (with RLS), a trigger that saves each new user's
+username, and an `email_for_username` function the app calls to resolve a
+username to its email at sign-in. Until it's run, usernames are still collected
+at sign-up (and shown on your profile) but sign-in uses email only.
+
 ## Scripts
 
 | Script                            | Purpose                          |

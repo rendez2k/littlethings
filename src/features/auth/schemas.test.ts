@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { signInSchema, signUpSchema } from './schemas';
+import { looksLikeEmail, signInSchema, signUpSchema } from './schemas';
 
 describe('signUpSchema', () => {
   it('accepts valid input', () => {
@@ -37,8 +37,20 @@ describe('signUpSchema', () => {
 });
 
 describe('signInSchema', () => {
-  it('requires email and password', () => {
-    expect(signInSchema.safeParse({ email: '', password: '' }).success).toBe(false);
-    expect(signInSchema.safeParse({ email: 'a@b.co', password: 'x' }).success).toBe(true);
+  it('requires an identifier and password', () => {
+    expect(signInSchema.safeParse({ identifier: '', password: '' }).success).toBe(false);
+    expect(signInSchema.safeParse({ identifier: '', password: 'x' }).success).toBe(false);
+  });
+
+  it('accepts either an email or a username as the identifier', () => {
+    expect(signInSchema.safeParse({ identifier: 'a@b.co', password: 'x' }).success).toBe(true);
+    expect(signInSchema.safeParse({ identifier: 'alex', password: 'x' }).success).toBe(true);
+  });
+});
+
+describe('looksLikeEmail', () => {
+  it('distinguishes emails from usernames', () => {
+    expect(looksLikeEmail('alex@example.com')).toBe(true);
+    expect(looksLikeEmail('alex')).toBe(false);
   });
 });

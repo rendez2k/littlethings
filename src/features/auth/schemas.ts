@@ -17,10 +17,18 @@ export const usernameSchema = z
   .max(24, 'At most 24 characters')
   .regex(/^[a-zA-Z0-9_]+$/, 'Letters, numbers and underscores only');
 
+/** Sign-in accepts either an email address or a username. */
+export const identifierSchema = z.string().trim().min(1, 'Enter your email or username');
+
 export const signInSchema = z.object({
-  email: emailSchema,
+  identifier: identifierSchema,
   password: z.string().min(1, 'Password is required'),
 });
+
+/** Heuristic: treat an identifier containing "@" as an email address. */
+export function looksLikeEmail(value: string): boolean {
+  return value.includes('@');
+}
 
 export const signUpSchema = z.object({
   username: usernameSchema,

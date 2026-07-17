@@ -127,17 +127,17 @@ function SignInForm() {
       noValidate
       onSubmit={handleSubmit(async (values) => {
         setResult(null);
-        setResult(await signIn(values.email, values.password));
+        setResult(await signIn(values.identifier, values.password));
       })}
     >
-      <Field id="signin-email" label="Email" error={errors.email?.message}>
+      <Field id="signin-identifier" label="Email or username" error={errors.identifier?.message}>
         {(p) => (
           <Input
-            type="email"
-            autoComplete="email"
-            placeholder="you@example.com"
+            type="text"
+            autoComplete="username"
+            placeholder="you@example.com or your username"
             {...p}
-            {...register('email')}
+            {...register('identifier')}
           />
         )}
       </Field>
