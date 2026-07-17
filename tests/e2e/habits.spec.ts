@@ -55,3 +55,45 @@ test('complete and undo a habit, updating the summary and streak', async ({ page
   await expect(page.getByRole('button', { name: 'Mark Meditate done' })).toBeVisible();
   await expect(page.getByText('0 of 1 complete')).toBeVisible();
 });
+
+test('open habit details and edit a day in the calendar', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Create my first habit' }).click();
+  await page.getByLabel('Name').fill('Walk');
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  // Tap the card to open details.
+  await page.getByRole('button', { name: 'Open Walk' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Walk' })).toBeVisible();
+
+  // Today is "not done yet"; tap it to complete, then it shows in history.
+  await page.getByRole('button', { name: /not done yet\. Tap to change/ }).click();
+  await expect(page.getByText('Completed').first()).toBeVisible();
+});
+
+test('archive, restore and delete a habit with confirmation', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Create my first habit' }).click();
+  await page.getByLabel('Name').fill('Read');
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  await page.getByRole('link', { name: 'Habits' }).click();
+
+  // Archive.
+  await page.getByRole('button', { name: 'Actions for Read' }).click();
+  await page.getByRole('menuitem', { name: 'Archive' }).click();
+  await expect(page.getByRole('heading', { name: 'Archived' })).toBeVisible();
+
+  // Restore.
+  await page.getByRole('button', { name: 'Actions for Read' }).click();
+  await page.getByRole('menuitem', { name: 'Restore' }).click();
+  await expect(page.getByRole('heading', { name: 'Active' })).toBeVisible();
+
+  // Delete with confirmation.
+  await page.getByRole('button', { name: 'Actions for Read' }).click();
+  await page.getByRole('menuitem', { name: 'Delete' }).click();
+  const dialog = page.getByRole('alertdialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Delete' }).click();
+  await expect(page.getByText('No habits yet')).toBeVisible();
+});

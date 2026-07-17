@@ -4,12 +4,12 @@ A calm, mobile-first **habit tracker** built as an installable Progressive Web A
 Track your habits privately — no account required, works offline, looks great in
 light and dark mode.
 
-> **Status:** Phases 1–4 complete — foundation & shell, optional email/username
-> accounts (Supabase), the local-first domain layer (Dexie, repositories,
-> schedule/completion/streak logic), habit creation (welcome, templates,
-> create/edit sheet), and daily tracking (Today screen with completion controls,
-> week date-strip, count/duration entry, historical editing, streaks and a
-> progress ring). Organisation & habit details are next per `BUILD_BRIEF.md`.
+> **Status:** Phases 1–5 complete — foundation & shell, optional email/username
+> accounts (Supabase), the local-first domain layer, habit creation, daily
+> tracking (Today with completion controls, date-strip, streaks, progress ring),
+> and organisation (Habits list with search/reorder/pause/archive/restore, a
+> styled delete confirmation, and a habit-details screen with stats and a
+> monthly calendar heat-map). Insights are next per `BUILD_BRIEF.md`.
 
 ## Tech stack
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CalendarClock, Plus } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { PlaceholderPanel } from '@/components/ui/placeholder-panel';
@@ -20,7 +21,8 @@ import { fromDateKey, todayKey, type DateKey } from '@/lib/dates';
 export default function TodayPage() {
   const habits = useActiveHabits();
   const settings = useAppSettings();
-  const { openCreate, openEdit } = useHabitEditor();
+  const { openCreate } = useHabitEditor();
+  const router = useRouter();
 
   const [today, setToday] = useState<DateKey | null>(null);
   const [selectedDate, setSelectedDate] = useState<DateKey | null>(null);
@@ -149,7 +151,7 @@ export default function TodayPage() {
                   streak={streak}
                   date={selectedDate}
                   today={today}
-                  onOpen={openEdit}
+                  onOpen={(habit) => router.push(`/habits/${habit.id}`)}
                 />
               </li>
             );

@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { todayKey } from '@/lib/dates';
 import { Sheet } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { getHabitService } from '@/features/habits/hooks';
 import { emptyDraft, habitToDraft } from '@/features/habits/draft';
 import { templateToDraft, type HabitTemplate } from '@/features/habits/templates';
@@ -29,6 +30,7 @@ type EditorState =
   | { kind: 'edit'; habit: Habit; draft: HabitDraft; token: number };
 
 export function HabitEditorProvider({ children }: { children: ReactNode }) {
+  const confirm = useConfirm();
   const [state, setState] = useState<EditorState>({ kind: 'closed' });
   const [submitting, setSubmitting] = useState(false);
   const [token, setToken] = useState(0);
@@ -84,13 +86,16 @@ export function HabitEditorProvider({ children }: { children: ReactNode }) {
 
   const handleDelete = useCallback(async () => {
     if (state.kind !== 'edit') return;
-    const confirmed =
-      typeof window === 'undefined' ||
-      window.confirm(`Delete “${state.habit.name}”? This can’t be undone.`);
-    if (!confirmed) return;
+    const ok = await confirm({
+      title: `Delete “${state.habit.name}”?`,
+      description: 'This removes the habit and its history from this device. It can’t be undone.',
+      confirmLabel: 'Delete',
+      destructive: true,
+    });
+    if (!ok) return;
     await getHabitService().softDelete(state.habit.id);
     close();
-  }, [state, close]);
+  }, [state, close, confirm]);
 
   const pickTemplate = useCallback(
     (template: HabitTemplate) => {

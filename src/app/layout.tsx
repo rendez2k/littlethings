@@ -3,6 +3,7 @@ import '@/styles/globals.css';
 import { ThemeScript } from '@/components/theme/theme-script';
 import { AppearanceProvider } from '@/components/theme/appearance-provider';
 import { AuthProvider } from '@/features/auth/auth-provider';
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { HabitEditorProvider } from '@/components/habits/habit-editor-provider';
 import { AppShell } from '@/components/layout/app-shell';
 import { ServiceWorkerRegistrar } from '@/components/pwa/service-worker-registrar';
@@ -59,9 +60,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <AppearanceProvider>
           <AuthProvider>
-            <HabitEditorProvider>
-              <AppShell>{children}</AppShell>
-            </HabitEditorProvider>
+            <ConfirmProvider>
+              <HabitEditorProvider>
+                <AppShell>{children}</AppShell>
+              </HabitEditorProvider>
+            </ConfirmProvider>
           </AuthProvider>
         </AppearanceProvider>
         <ServiceWorkerRegistrar />
