@@ -45,3 +45,21 @@ export function useAllHabits() {
 export function useHabit(id: string | null) {
   return useLiveQuery(() => (id ? getHabitRepo().getById(id) : Promise.resolve(undefined)), [id]);
 }
+
+/** Completion records for a single local date, across all habits. */
+export function useCompletionsForDate(date: string) {
+  return useLiveQuery(() => getCompletionRepo().getByDate(date), [date]);
+}
+
+/** Every completion record (used to compute streaks across the habit list). */
+export function useAllCompletions() {
+  return useLiveQuery(() => getCompletionRepo().getAll(), []);
+}
+
+/** Completion records for one habit (habit details / streaks). */
+export function useCompletionsForHabit(habitId: string | null) {
+  return useLiveQuery(
+    () => (habitId ? getCompletionRepo().getByHabit(habitId) : Promise.resolve([])),
+    [habitId],
+  );
+}

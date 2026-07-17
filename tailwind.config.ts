@@ -78,6 +78,7 @@ const config: Config = {
       animation: {
         'sheet-in': 'sheet-in 0.32s cubic-bezier(0.32, 0.72, 0, 1)',
         'fade-in': 'fade-in 0.2s ease-out',
+        pop: 'pulse 0.26s ease-out',
       },
     },
   },

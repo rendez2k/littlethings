@@ -37,3 +37,21 @@ test('create a habit from a template', async ({ page }) => {
 
   await expect(page.getByText('Meditate')).toBeVisible();
 });
+
+test('complete and undo a habit, updating the summary and streak', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Create my first habit' }).click();
+  await page.getByLabel('Name').fill('Meditate');
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  // Complete it.
+  await page.getByRole('button', { name: 'Mark Meditate done' }).click();
+  await expect(page.getByRole('button', { name: 'Mark Meditate not done' })).toBeVisible();
+  await expect(page.getByText('1 of 1 complete')).toBeVisible();
+  await expect(page.getByLabel('1 day streak')).toBeVisible();
+
+  // Undo it.
+  await page.getByRole('button', { name: 'Mark Meditate not done' }).click();
+  await expect(page.getByRole('button', { name: 'Mark Meditate done' })).toBeVisible();
+  await expect(page.getByText('0 of 1 complete')).toBeVisible();
+});
