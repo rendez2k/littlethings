@@ -53,3 +53,27 @@ A running log of notable decisions. Keep entries short.
     enumeration/listing).
 - **Graceful when unconfigured.** If the env vars are absent, the Supabase client
   is `null` and the Account screen shows the local-only state instead of forms.
+
+## Phase 2 — Domain & local database
+
+- **Local date keys (`YYYY-MM-DD`) are canonical.** All history is keyed by the
+  user's local calendar date, computed from local Date fields (never UTC), so
+  travel/DST can't shift a day. `diffInDays` compares via `Date.UTC` to stay
+  DST-safe. Date logic lives only in `src/lib/dates`, never in components.
+- **Zod schemas are the single source of truth**; TypeScript types are inferred
+  from them, and the same schema guards forms, the DB boundary and imports.
+- **Schedules** are a discriminated union. Flexible types (per-week/month) are
+  "available" every day and judged over their period, so we never invent a
+  specific missed weekday for them (brief §13).
+- **Completions are separate records** with a soft-delete tombstone. The unique
+  `[habitId+date]` index means a day has at most one row; undo tombstones it and
+  re-completing revives the same row (avoids duplicates / sync churn).
+- **Streaks: neutral bridging.** Skipped and paused days neither break nor
+  inflate a streak; missed past days break it; today is neutral until done.
+  Prorated targets keep partial first/last periods fair. Fully specified and
+  tested — see `docs/STREAKS.md`.
+- **Repositories return domain objects, take an injectable Dexie instance.**
+  Tests run against `fake-indexeddb` with a fresh uniquely-named DB per test.
+- **App settings vs appearance.** Behavioural settings (week start, streak
+  visibility, sounds, default reminder) live in the DB via `SettingsRepository`;
+  appearance stays in localStorage because it must apply before first paint.

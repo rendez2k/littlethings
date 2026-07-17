@@ -1,4 +1,6 @@
 import '@testing-library/jest-dom/vitest';
+// Provide a real IndexedDB implementation for repository/service tests.
+import 'fake-indexeddb/auto';
 import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 

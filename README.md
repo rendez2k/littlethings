@@ -4,15 +4,18 @@ A calm, mobile-first **habit tracker** built as an installable Progressive Web A
 Track your habits privately — no account required, works offline, looks great in
 light and dark mode.
 
-> **Status:** Phase 1 (foundation & application shell) complete, plus an optional
-> email/username account layer (Supabase). Habit tracking, local database and
-> insights arrive in later phases per `BUILD_BRIEF.md`.
+> **Status:** Phases 1–2 complete — foundation & application shell, an optional
+> email/username account layer (Supabase), and the full local-first domain layer
+> (Dexie database, repositories, schedule/completion/streak logic, all unit
+> tested). Habit-creation and tracking screens arrive next per `BUILD_BRIEF.md`.
 
 ## Tech stack
 
 - **Next.js** (App Router) + **React** + **TypeScript** (strict)
 - **Tailwind CSS** with semantic design tokens (CSS custom properties)
 - **Lucide** icons
+- **Dexie** (IndexedDB) for local-first storage, behind repository interfaces
+- **date-fns**-style local date utilities (custom, timezone-safe)
 - **Supabase** (optional, for accounts) — the app is fully usable without it
 - **React Hook Form** + **Zod** for forms and validation
 - **Vitest** + **React Testing Library** (unit/component), **Playwright** (E2E)
@@ -113,14 +116,36 @@ src/
     pwa/              # Service worker registrar
     ui/               # Restyled primitives (button, card, switch, …)
   features/
-    settings/         # Appearance model + persistence
+    habits/           # Habit schema, schedule matching, repository, service, factory
+    completions/      # Completion schema, day-status logic, repository, service
+    streaks/          # Tested streak calculation (see docs/STREAKS.md)
+    settings/         # Appearance + app-settings model, repository
     auth/             # Optional Supabase account layer
-  lib/                # Small utilities (cn, constants, supabase client)
+  db/                 # Dexie database definition
+  lib/
+    dates/            # Local date keys, week/month boundaries (timezone-safe)
+    …                 # cn, id, constants, supabase client
   styles/             # Global tokens + Tailwind layers
+supabase/migrations/  # Optional SQL for username login
 tests/                # Vitest setup, unit tests, Playwright e2e
 public/               # manifest, service worker, icons
 scripts/              # Icon generator
 ```
+
+## Domain & data model
+
+The app is local-first (brief §15). UI never touches Dexie directly — it goes
+through **repositories** (`HabitRepository`, `CompletionRepository`,
+`SettingsRepository`) and **services** that stamp IDs/timestamps and keep
+invariants. This keeps a future Supabase sync adapter a drop-in.
+
+- **Habits** carry a schedule (daily / weekdays / N-per-week / N-per-month /
+  every-N-days / one-off) and a target (boolean / count / duration).
+- **Completions** are stored separately, keyed by local calendar date, with a
+  soft-deletion tombstone for future sync. Absence of a record on a past
+  scheduled day means "missed" — never counted for future days.
+- **Streaks** are computed in one tested module — see
+  [`docs/STREAKS.md`](docs/STREAKS.md) for the exact rules.
 
 ## Testing
 
