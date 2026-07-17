@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/layout/page-header';
 import { AppearanceSettings } from '@/components/settings/appearance-settings';
+import { AccountSettings } from '@/components/settings/account-settings';
 import { SettingsRow, SettingsSection } from '@/components/settings/settings-section';
 import { APP_VERSION } from '@/lib/constants';
 
@@ -24,15 +25,13 @@ export default function SettingsPage() {
         />
       </SettingsSection>
 
-      <SettingsSection title="Account">
-        <SettingsRow
-          label="Using Little Things without an account"
-          description="No sign-in required. Optional cloud sync may be offered in the future so you can use multiple devices."
-        />
-      </SettingsSection>
+      <AccountSettings />
 
       <SettingsSection title="About">
-        <SettingsRow label="Version" control={<span className="text-sm text-muted">{APP_VERSION}</span>} />
+        <SettingsRow
+          label="Version"
+          control={<span className="text-sm text-muted">{APP_VERSION}</span>}
+        />
         <SettingsRow label="Privacy" description="Little Things does not track you or run ads." />
       </SettingsSection>
     </>

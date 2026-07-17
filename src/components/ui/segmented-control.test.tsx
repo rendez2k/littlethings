@@ -10,9 +10,7 @@ describe('SegmentedControl', () => {
   ];
 
   it('marks the selected option and exposes a radiogroup', () => {
-    render(
-      <SegmentedControl ariaLabel="Test" value="a" onChange={() => {}} options={options} />,
-    );
+    render(<SegmentedControl ariaLabel="Test" value="a" onChange={() => {}} options={options} />);
     expect(screen.getByRole('radiogroup', { name: 'Test' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'Alpha' })).toBeChecked();
     expect(screen.getByRole('radio', { name: 'Beta' })).not.toBeChecked();
@@ -20,9 +18,7 @@ describe('SegmentedControl', () => {
 
   it('calls onChange with the chosen value', async () => {
     const onChange = vi.fn();
-    render(
-      <SegmentedControl ariaLabel="Test" value="a" onChange={onChange} options={options} />,
-    );
+    render(<SegmentedControl ariaLabel="Test" value="a" onChange={onChange} options={options} />);
     await userEvent.click(screen.getByRole('radio', { name: 'Beta' }));
     expect(onChange).toHaveBeenCalledWith('b');
   });

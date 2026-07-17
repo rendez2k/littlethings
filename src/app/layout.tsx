@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
 import { ThemeScript } from '@/components/theme/theme-script';
 import { AppearanceProvider } from '@/components/theme/appearance-provider';
+import { AuthProvider } from '@/features/auth/auth-provider';
 import { AppShell } from '@/components/layout/app-shell';
 import { ServiceWorkerRegistrar } from '@/components/pwa/service-worker-registrar';
 
@@ -56,7 +57,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <AppearanceProvider>
-          <AppShell>{children}</AppShell>
+          <AuthProvider>
+            <AppShell>{children}</AppShell>
+          </AuthProvider>
         </AppearanceProvider>
         <ServiceWorkerRegistrar />
       </body>

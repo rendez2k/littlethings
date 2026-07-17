@@ -50,16 +50,16 @@ If these are unset, the Account screen simply shows the local-only experience.
 
 ## Scripts
 
-| Script | Purpose |
-| --- | --- |
-| `npm run dev` | Start the dev server |
-| `npm run build` | Production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run format` | Prettier write |
-| `npm run test` | Vitest (unit + component) |
-| `npm run test:e2e` | Playwright journeys |
+| Script                            | Purpose                          |
+| --------------------------------- | -------------------------------- |
+| `npm run dev`                     | Start the dev server             |
+| `npm run build`                   | Production build                 |
+| `npm run start`                   | Serve the production build       |
+| `npm run lint`                    | ESLint                           |
+| `npm run typecheck`               | `tsc --noEmit`                   |
+| `npm run format`                  | Prettier write                   |
+| `npm run test`                    | Vitest (unit + component)        |
+| `npm run test:e2e`                | Playwright journeys              |
 | `node scripts/generate-icons.mjs` | Regenerate placeholder PWA icons |
 
 ## Design system

@@ -11,9 +11,7 @@ const PREINSTALLED_CHROMIUM =
   process.env.PLAYWRIGHT_CHROMIUM_PATH ??
   (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
 
-const launchOptions = PREINSTALLED_CHROMIUM
-  ? { executablePath: PREINSTALLED_CHROMIUM }
-  : undefined;
+const launchOptions = PREINSTALLED_CHROMIUM ? { executablePath: PREINSTALLED_CHROMIUM } : undefined;
 
 /**
  * Playwright drives the important user journeys against a production build.

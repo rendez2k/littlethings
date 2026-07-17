@@ -15,7 +15,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         id="main-content"
         className="flex-1 px-4 pt-safe-top"
         // Leave room for the fixed bottom navigation + safe area.
-        style={{ paddingBottom: 'calc(var(--nav-clearance, 5.5rem) + env(safe-area-inset-bottom))' }}
+        style={{
+          paddingBottom: 'calc(var(--nav-clearance, 5.5rem) + env(safe-area-inset-bottom))',
+        }}
       >
         {children}
       </main>

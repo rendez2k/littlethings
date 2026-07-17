@@ -26,7 +26,7 @@ export function OfflineIndicator() {
   return (
     <div
       role="status"
-      className="sticky top-0 z-30 flex items-center justify-center gap-2 bg-primary-soft px-4 py-2 text-sm font-medium text-text pt-safe-top"
+      className="sticky top-0 z-30 flex items-center justify-center gap-2 bg-primary-soft px-4 py-2 pt-safe-top text-sm font-medium text-text"
     >
       <CloudOff aria-hidden="true" className="h-4 w-4" />
       <span>You&rsquo;re offline, but you can keep tracking.</span>
