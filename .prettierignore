@@ -1,0 +1,10 @@
+.next/
+node_modules/
+out/
+coverage/
+playwright-report/
+test-results/
+public/sw.js
+pnpm-lock.yaml
+package-lock.json
+BUILD_BRIEF.md
