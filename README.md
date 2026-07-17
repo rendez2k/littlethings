@@ -4,12 +4,12 @@ A calm, mobile-first **habit tracker** built as an installable Progressive Web A
 Track your habits privately — no account required, works offline, looks great in
 light and dark mode.
 
-> **Status:** Phases 1–6 complete — foundation & shell, optional email/username
-> accounts (Supabase), the local-first domain layer, habit creation, daily
-> tracking, organisation & habit details, and **Insights** (week/month/year
-> ranges, completion rate, perfect days, streaks, an accessible completion-trend
-> chart, habit-by-habit bars, most-consistent-day, plain-language summaries and a
-> low-data state). Settings & data portability are next per `BUILD_BRIEF.md`.
+> **Status:** v1 complete. Today, Habits, Goals (bucket list), Insights and
+> Settings all work; habits and goals are created, tracked, organised and
+> reported on; light/dark/system themes and six palettes; JSON export/import;
+> first-run onboarding; installable and fully offline. Optional email/username
+> accounts (Supabase) are wired but not required. See **Deployment & setup**
+> below for the short checklist to go live.
 
 ## Tech stack
 
@@ -121,9 +121,12 @@ src/
     habits/           # Habit schema, schedule matching, repository, service, factory
     completions/      # Completion schema, day-status logic, repository, service
     streaks/          # Tested streak calculation (see docs/STREAKS.md)
+    insights/         # Aggregated statistics service
+    goals/            # Bucket-list goals model, repository, service
+    data/             # JSON export/import (versioned, Zod-validated)
     settings/         # Appearance + app-settings model, repository
     auth/             # Optional Supabase account layer
-  db/                 # Dexie database definition
+  db/                 # Dexie database definition (v2)
   lib/
     dates/            # Local date keys, week/month boundaries (timezone-safe)
     …                 # cn, id, constants, supabase client
@@ -160,13 +163,48 @@ Playwright uses Chromium. In managed environments a pre-installed browser at
 `/opt/pw-browsers/chromium` is detected automatically; otherwise run
 `npx playwright install chromium`.
 
-## Deployment (Vercel)
+## Deployment & setup — what you need to do
 
-1. Push this repository to GitHub.
-2. Import it into Vercel — it auto-detects Next.js; no custom server required.
-3. (Optional) add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   in Vercel project settings to enable accounts.
-4. Deploy.
+Everything works locally with zero configuration. To put it online:
+
+1. **Deploy to Vercel (required).**
+   - Push this repo to GitHub (already done if you're reading this there).
+   - Go to <https://vercel.com>, "Add New… → Project", and import the repo.
+   - Vercel auto-detects Next.js — no settings to change, no custom server.
+   - Click **Deploy**. You'll get a live URL you can open on your phone and
+     "Add to Home Screen" (Settings → Install for step-by-step help).
+
+2. **Enable accounts (optional).** The app is fully usable without this.
+   - In Vercel → Project → Settings → **Environment Variables**, add:
+     - `NEXT_PUBLIC_SUPABASE_URL` = your Supabase project URL
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase **publishable/anon** key
+   - Redeploy.
+   - To allow **username** login (not just email) and unique usernames, open your
+     Supabase dashboard → **SQL Editor**, paste
+     [`supabase/migrations/0001_username_login.sql`](supabase/migrations/0001_username_login.sql)
+     and **Run** it once.
+   - In Supabase → Authentication → Providers → Email, decide whether to keep
+     "Confirm email" on (users click a link before first login) or off (instant
+     login — handy while testing).
+
+3. **Make it yours (optional).**
+   - Replace the placeholder icons in `public/icons` (regenerate with
+     `node scripts/generate-icons.mjs` or drop in your own 192/512 + maskable
+     PNGs) and update the name in `public/manifest.webmanifest`.
+   - The footer says "Made for Amelia with ❤️" — edit
+     `src/components/layout/footer.tsx` to change it.
+   - The feedback link points to an email in `src/app/settings/page.tsx`.
+
+That's it — no database, servers, or accounts are required for the core app.
+
+### Local development
+
+```bash
+npm install
+npm run dev   # http://localhost:3000
+```
+
+In development, Settings → Data → **Add demo data** seeds sample habits and goals.
 
 ## Accessibility
 

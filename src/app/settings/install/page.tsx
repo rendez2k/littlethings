@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SubPage } from '@/components/layout/sub-page';
+import { InstallButton } from '@/components/pwa/install-button';
 
 export const metadata: Metadata = { title: 'Install' };
 
@@ -22,6 +23,7 @@ export default function InstallPage() {
       <p className="text-muted">
         Add Little Things to your home screen to use it like a native app — full screen and offline.
       </p>
+      <InstallButton />
       <Steps
         title="iPhone & iPad (Safari)"
         steps={[

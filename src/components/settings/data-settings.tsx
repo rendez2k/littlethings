@@ -125,6 +125,7 @@ export function DataSettings() {
         <input
           ref={fileInput}
           type="file"
+          aria-label="Backup file"
           accept="application/json,.json"
           className="sr-only"
           onChange={(e) => {

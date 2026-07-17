@@ -77,3 +77,23 @@ A running log of notable decisions. Keep entries short.
 - **App settings vs appearance.** Behavioural settings (week start, streak
   visibility, sounds, default reminder) live in the DB via `SettingsRepository`;
   appearance stays in localStorage because it must apply before first paint.
+
+## Phases 7–9 — Settings, portability, goals, PWA & quality
+
+- **Goals (bucket list)** are a separate, simpler model than habits (no schedule)
+  — brief §1. Added as a fifth bottom-nav destination; a deliberate, small
+  deviation from "four destinations" to deliver the feature cleanly.
+- **Export/import** uses a versioned, Zod-validated bundle. Replace mode saves a
+  backup first and downloads it; import reloads the app so appearance (held in
+  localStorage for pre-paint) and all views reflect the new data.
+- **Onboarding** is a single dismissible sheet gated by a localStorage flag —
+  honouring "no multi-page carousel" while still welcoming new users. E2E uses a
+  shared fixture that pre-sets the flag so functional tests aren't blocked.
+- **Accessibility** is gated in CI-style E2E with `@axe-core/playwright`
+  (serious/critical violations fail). Fixes: the done-card no longer dims text
+  (contrast), the palette picker is a `div[role=radiogroup]` not `ul>li`, and the
+  hidden import file input has an accessible name.
+- **Offline** is verified by an E2E that loses connectivity after first load and
+  confirms the shell + local data survive.
+- **PWA install**: a native install button appears when the browser offers
+  `beforeinstallprompt`; iOS is covered by step-by-step instructions.

@@ -32,18 +32,17 @@ export function AppearanceSettings() {
       </SettingsRow>
 
       <SettingsRow label="Accent palette" description="Sets primary controls and highlights.">
-        <ul className="flex flex-wrap gap-3" role="radiogroup" aria-label="Accent palette">
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Accent palette">
           {PALETTES.map((palette) => (
-            <li key={palette}>
-              <PaletteSwatch
-                palette={palette}
-                selected={appearance.palette === palette}
-                theme={resolvedTheme}
-                onSelect={() => setAppearance({ palette })}
-              />
-            </li>
+            <PaletteSwatch
+              key={palette}
+              palette={palette}
+              selected={appearance.palette === palette}
+              theme={resolvedTheme}
+              onSelect={() => setAppearance({ palette })}
+            />
           ))}
-        </ul>
+        </div>
       </SettingsRow>
 
       <SettingsRow label="Habit cards" description="How much breathing room each card has.">

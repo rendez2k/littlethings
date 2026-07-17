@@ -39,8 +39,9 @@ export function TodayHabitCard({ entry, streak, date, today, showStreak = true, 
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-card border border-border bg-surface p-3 shadow-card transition',
-        done && 'opacity-[0.72]',
+        'flex items-center gap-3 rounded-card border border-border p-3 shadow-card transition',
+        // Keep text at full contrast; show "done" with a soft tinted surface.
+        done ? 'bg-background' : 'bg-surface',
       )}
     >
       <button
