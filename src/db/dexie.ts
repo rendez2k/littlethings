@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { Habit } from '@/features/habits/schemas';
 import type { Completion } from '@/features/completions/schemas';
+import type { Goal } from '@/features/goals/schemas';
 import type { AppSettings } from '@/features/settings/schemas';
 
 /**
@@ -10,7 +11,7 @@ import type { AppSettings } from '@/features/settings/schemas';
  */
 
 export const DB_NAME = 'little-things';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** A single-row settings record; `key` is always `'app'`. */
 export interface SettingsRow {
@@ -27,6 +28,7 @@ export interface MetaRow {
 export class LittleThingsDB extends Dexie {
   habits!: Table<Habit, string>;
   completions!: Table<Completion, string>;
+  goals!: Table<Goal, string>;
   settings!: Table<SettingsRow, string>;
   meta!: Table<MetaRow, string>;
 
@@ -39,6 +41,10 @@ export class LittleThingsDB extends Dexie {
       completions: 'id, &[habitId+date], habitId, date, updatedAt, deletedAt',
       settings: 'key',
       meta: 'key',
+    });
+    // v2 adds the bucket-list goals table.
+    this.version(2).stores({
+      goals: 'id, sortOrder, done, updatedAt, deletedAt',
     });
   }
 }

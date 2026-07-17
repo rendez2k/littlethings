@@ -151,6 +151,7 @@ export default function TodayPage() {
                   streak={streak}
                   date={selectedDate}
                   today={today}
+                  showStreak={settings.showStreaks}
                   onOpen={(habit) => router.push(`/habits/${habit.id}`)}
                 />
               </li>

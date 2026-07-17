@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 /**
  * Phase 3 journey: first launch → create the first habit → it appears on Today,

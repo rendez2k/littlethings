@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { BottomNav } from '@/components/navigation/bottom-nav';
 import { OfflineIndicator } from '@/components/layout/offline-indicator';
+import { Onboarding } from '@/components/onboarding/onboarding';
 
 /**
  * The mobile application shell. Content is centred within a comfortable
@@ -22,6 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
       <BottomNav />
+      <Onboarding />
     </div>
   );
 }

@@ -17,6 +17,7 @@ interface Props {
   streak: StreakResult;
   date: DateKey;
   today: DateKey;
+  showStreak?: boolean;
   onOpen: (habit: Habit) => void;
 }
 
@@ -26,7 +27,7 @@ const STREAK_UNIT_LABEL: Record<StreakResult['unit'], string> = {
   month: 'month',
 };
 
-export function TodayHabitCard({ entry, streak, date, today, onOpen }: Props) {
+export function TodayHabitCard({ entry, streak, date, today, showStreak = true, onOpen }: Props) {
   const { resolvedTheme } = useAppearance();
   const { habit, completion, status } = entry;
   const Icon = getHabitIcon(habit.icon);
@@ -67,7 +68,7 @@ export function TodayHabitCard({ entry, streak, date, today, onOpen }: Props) {
               {scheduleLabel(habit.schedule)}
               {target ? ` · ${target}` : ''}
             </span>
-            {streak.current > 0 ? (
+            {showStreak && streak.current > 0 ? (
               <span
                 className="inline-flex shrink-0 items-center gap-0.5 font-medium"
                 style={{ color: accent }}
