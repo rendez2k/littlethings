@@ -12,6 +12,15 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.1',
+    date: 'A face for every goal',
+    items: [
+      'Goals can now have an icon — pick from travel, fitness, learning, home and more.',
+      'We suggest a fitting icon from your goal’s name as you type.',
+      'Your goals list shows each icon at a glance.',
+    ],
+  },
+  {
     version: '0.2.0',
     date: 'Personal touches',
     items: [

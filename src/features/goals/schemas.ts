@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { dateKeySchema } from '@/features/habits/schemas';
+import { DEFAULT_GOAL_ICON } from './icons';
 
 /**
  * Bucket-list goals (brief §1): longer-term projects and things to complete,
@@ -11,6 +12,8 @@ export const goalSchema = z.object({
   id: z.string().uuid(),
   title: z.string().trim().min(1, 'Give it a name').max(120),
   notes: z.string().max(2000).optional(),
+  /** Stored icon key (see ./icons). Defaults keep older records/exports valid. */
+  icon: z.string().min(1).catch(DEFAULT_GOAL_ICON).default(DEFAULT_GOAL_ICON),
   /** Optional aspirational target date. */
   targetDate: dateKeySchema.nullable(),
   done: z.boolean(),
@@ -25,6 +28,7 @@ export type Goal = z.infer<typeof goalSchema>;
 export const goalDraftSchema = z.object({
   title: z.string().trim().min(1, 'Give it a name').max(120),
   notes: z.string().max(2000).optional(),
+  icon: z.string().min(1).optional(),
   targetDate: dateKeySchema.nullable().optional(),
 });
 export type GoalDraft = z.infer<typeof goalDraftSchema>;
@@ -33,6 +37,7 @@ export type GoalDraft = z.infer<typeof goalDraftSchema>;
 export const goalFormSchema = z.object({
   title: z.string().trim().min(1, 'Give it a name').max(120),
   notes: z.preprocess((v) => (v === '' ? undefined : v), z.string().max(2000).optional()),
+  icon: z.string().min(1).default(DEFAULT_GOAL_ICON),
   targetDate: z.preprocess(
     (v) => (v === '' || v === undefined ? null : v),
     dateKeySchema.nullable(),

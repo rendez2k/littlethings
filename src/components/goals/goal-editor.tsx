@@ -1,6 +1,7 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useEffect, useRef } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trash2 } from 'lucide-react';
 import { Sheet } from '@/components/ui/sheet';
@@ -9,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/components/ui/confirm-dialog';
 import { getGoalService } from '@/features/goals/hooks';
+import { GoalIconPicker } from '@/components/goals/goal-icon-picker';
+import { DEFAULT_GOAL_ICON, getGoalIcon, suggestGoalIcon } from '@/features/goals/icons';
 import { goalFormSchema, type Goal, type GoalFormValues } from '@/features/goals/schemas';
 
 const FORM_ID = 'goal-editor-form';
@@ -76,6 +79,9 @@ function GoalForm({
 }) {
   const {
     register,
+    control,
+    watch,
+    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<GoalFormValues>({
@@ -83,9 +89,22 @@ function GoalForm({
     defaultValues: {
       title: goal?.title ?? '',
       notes: goal?.notes ?? undefined,
+      icon: goal?.icon ?? DEFAULT_GOAL_ICON,
       targetDate: goal?.targetDate ?? null,
     },
   });
+
+  // Suggest an icon from the title until the user picks one manually.
+  const iconTouched = useRef(Boolean(goal));
+  const title = watch('title');
+  const icon = watch('icon');
+  useEffect(() => {
+    if (iconTouched.current) return;
+    const suggested = suggestGoalIcon(title);
+    if (suggested) setValue('icon', suggested, { shouldDirty: false });
+  }, [title, setValue]);
+
+  const PreviewIcon = getGoalIcon(icon);
 
   return (
     <form
@@ -99,9 +118,38 @@ function GoalForm({
         onSaved();
       })}
     >
-      <Field id="goal-title" label="Goal" error={errors.title?.message}>
-        {(p) => <Input placeholder="e.g. Run a half marathon" {...p} {...register('title')} />}
-      </Field>
+      <div className="flex items-end gap-3">
+        <div
+          aria-hidden="true"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground"
+        >
+          <PreviewIcon className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <Field id="goal-title" label="Goal" error={errors.title?.message}>
+            {(p) => (
+              <Input placeholder="e.g. Run a half marathon" {...p} {...register('title')} />
+            )}
+          </Field>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-text">Icon</p>
+        <Controller
+          control={control}
+          name="icon"
+          render={({ field }) => (
+            <GoalIconPicker
+              value={field.value}
+              onChange={(v) => {
+                iconTouched.current = true;
+                field.onChange(v);
+              }}
+            />
+          )}
+        />
+      </div>
 
       <Field id="goal-date" label="Target date (optional)" error={errors.targetDate?.message}>
         {(p) => <Input type="date" {...p} {...register('targetDate')} />}

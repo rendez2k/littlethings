@@ -3,10 +3,12 @@
 import { Check, Flag } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { getGoalService } from '@/features/goals/hooks';
+import { getGoalIcon } from '@/features/goals/icons';
 import type { Goal } from '@/features/goals/schemas';
 import { fromDateKey } from '@/lib/dates';
 
 export function GoalRow({ goal, onEdit }: { goal: Goal; onEdit: (goal: Goal) => void }) {
+  const Icon = getGoalIcon(goal.icon);
   return (
     <div className="flex items-center gap-3 rounded-card border border-border bg-surface p-3 shadow-card">
       <button
@@ -28,24 +30,35 @@ export function GoalRow({ goal, onEdit }: { goal: Goal; onEdit: (goal: Goal) => 
       <button
         type="button"
         onClick={() => onEdit(goal)}
-        className="flex min-w-0 flex-1 flex-col items-start text-left"
+        className="flex min-w-0 flex-1 items-center gap-3 text-left"
         aria-label={`Edit ${goal.title}`}
       >
         <span
-          className={cn('truncate font-medium text-text', goal.done && 'text-muted line-through')}
+          aria-hidden="true"
+          className={cn(
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
+            goal.done ? 'border border-border text-muted' : 'bg-primary-soft text-primary',
+          )}
         >
-          {goal.title}
+          <Icon className="h-5 w-5" />
         </span>
-        {goal.targetDate ? (
-          <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted">
-            <Flag className="h-3 w-3" aria-hidden="true" />
-            {fromDateKey(goal.targetDate).toLocaleDateString(undefined, {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            })}
+        <span className="flex min-w-0 flex-col">
+          <span
+            className={cn('truncate font-medium text-text', goal.done && 'text-muted line-through')}
+          >
+            {goal.title}
           </span>
-        ) : null}
+          {goal.targetDate ? (
+            <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted">
+              <Flag className="h-3 w-3" aria-hidden="true" />
+              {fromDateKey(goal.targetDate).toLocaleDateString(undefined, {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}
+            </span>
+          ) : null}
+        </span>
       </button>
     </div>
   );
