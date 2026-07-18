@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  accentVariant,
   DEFAULT_APPEARANCE,
   parseAppearance,
   resolveTheme,
@@ -49,5 +50,14 @@ describe('resolveTheme', () => {
   it('honours explicit choices regardless of OS preference', () => {
     expect(resolveTheme('light', true)).toBe('light');
     expect(resolveTheme('dark', false)).toBe('dark');
+    expect(resolveTheme('pastel', true)).toBe('pastel');
+  });
+});
+
+describe('accentVariant', () => {
+  it('maps pastel and light to the light accents, dark to dark', () => {
+    expect(accentVariant('light')).toBe('light');
+    expect(accentVariant('pastel')).toBe('light');
+    expect(accentVariant('dark')).toBe('dark');
   });
 });

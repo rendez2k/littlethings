@@ -1,4 +1,5 @@
 import type { HabitColor } from './schemas';
+import { accentVariant, type ResolvedTheme } from '@/features/settings/appearance';
 
 /**
  * Habit accent colours (brief §7.4). Each has an accessible light and dark
@@ -58,14 +59,14 @@ export interface HabitAccent {
 }
 
 /** Resolve a habit colour to concrete values for the active theme. */
-export function getHabitAccent(color: HabitColor, theme: 'light' | 'dark'): HabitAccent {
-  const accent = HABIT_COLOR_VALUES[color][theme];
+export function getHabitAccent(color: HabitColor, theme: ResolvedTheme): HabitAccent {
+  const variant = accentVariant(theme); // pastel shares the light accents
+  const accent = HABIT_COLOR_VALUES[color][variant];
   const [r, g, b] = hexToRgb(accent);
   return {
     accent,
-    soft: `rgba(${r}, ${g}, ${b}, ${theme === 'dark' ? 0.22 : 0.14})`,
-    // In light mode accents are dark → white text; in dark mode accents are
-    // light → dark ink text. Guarantees contrast on the accent.
-    on: theme === 'light' ? WHITE : INK,
+    soft: `rgba(${r}, ${g}, ${b}, ${variant === 'dark' ? 0.22 : 0.14})`,
+    // Light/pastel accents are dark → white text; dark accents are light → ink.
+    on: variant === 'light' ? WHITE : INK,
   };
 }

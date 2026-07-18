@@ -16,6 +16,7 @@ import { useAppSettings } from '@/features/settings/hooks';
 import { buildDayView } from '@/features/completions/day-view';
 import { computeStreak, type StreakResult } from '@/features/streaks/streak';
 import type { Completion } from '@/features/completions/schemas';
+import { encouragement } from '@/features/encouragement/messages';
 import { fromDateKey, todayKey, type DateKey } from '@/lib/dates';
 
 export default function TodayPage() {
@@ -65,6 +66,15 @@ export default function TodayPage() {
 
   const view = buildDayView(habits, completionsForDate ?? [], selectedDate, today);
   const isToday = selectedDate === today;
+  const doneCount = view.summary.completed + view.summary.skipped;
+  const encourageLine = settings.showMotivationalMessages
+    ? encouragement({
+        name: settings.displayName,
+        completed: doneCount,
+        total: view.summary.total,
+        seed: Number(selectedDate.slice(8, 10)),
+      })
+    : 'Keep going — small things add up.';
 
   return (
     <>
@@ -96,9 +106,7 @@ export default function TodayPage() {
             <p className="text-sm font-semibold text-text">
               {view.summary.completed + view.summary.skipped} of {view.summary.total} complete
             </p>
-            <p className="text-xs text-muted">
-              {isToday ? 'Keep going — small things add up.' : dateLabel}
-            </p>
+            <p className="text-xs text-muted">{isToday ? encourageLine : dateLabel}</p>
           </div>
           <ProgressRing
             ratio={view.summary.ratio}

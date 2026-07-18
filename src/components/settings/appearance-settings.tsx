@@ -3,10 +3,12 @@
 import { Check } from 'lucide-react';
 import { useAppearance } from '@/components/theme/appearance-provider';
 import {
+  accentVariant,
   PALETTES,
   PALETTE_LABELS,
   PALETTE_SWATCHES,
   type Palette,
+  type ResolvedTheme,
 } from '@/features/settings/appearance';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Switch } from '@/components/ui/switch';
@@ -26,6 +28,7 @@ export function AppearanceSettings() {
           options={[
             { value: 'system', label: 'System' },
             { value: 'light', label: 'Light' },
+            { value: 'pastel', label: 'Pastel' },
             { value: 'dark', label: 'Dark' },
           ]}
         />
@@ -80,10 +83,11 @@ function PaletteSwatch({
 }: {
   palette: Palette;
   selected: boolean;
-  theme: 'light' | 'dark';
+  theme: ResolvedTheme;
   onSelect: () => void;
 }) {
-  const color = PALETTE_SWATCHES[palette][theme];
+  const variant = accentVariant(theme);
+  const color = PALETTE_SWATCHES[palette][variant];
   return (
     <button
       type="button"
@@ -103,7 +107,7 @@ function PaletteSwatch({
           aria-hidden="true"
           className="h-5 w-5"
           strokeWidth={3}
-          style={{ color: theme === 'dark' ? '#17151f' : '#ffffff' }}
+          style={{ color: variant === 'dark' ? '#17151f' : '#ffffff' }}
         />
       ) : null}
     </button>

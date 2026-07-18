@@ -6,6 +6,8 @@ import { z } from 'zod';
  * can be applied before first paint; these are the behavioural preferences.
  */
 export const appSettingsSchema = z.object({
+  /** The user's name, used for gentle personalisation. Empty = not set. */
+  displayName: z.string().max(40).default(''),
   /** 0 = Sunday, 1 = Monday. */
   weekStartsOn: z.union([z.literal(0), z.literal(1)]),
   showStreaks: z.boolean(),
@@ -19,6 +21,7 @@ export const appSettingsSchema = z.object({
 export type AppSettings = z.infer<typeof appSettingsSchema>;
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
+  displayName: '',
   weekStartsOn: 1,
   showStreaks: true,
   showMotivationalMessages: true,

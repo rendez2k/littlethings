@@ -7,7 +7,7 @@
  * here is intentionally small and serialisable so that migration is trivial.
  */
 
-export const THEME_MODES = ['system', 'light', 'dark'] as const;
+export const THEME_MODES = ['system', 'light', 'dark', 'pastel'] as const;
 export type ThemeMode = (typeof THEME_MODES)[number];
 
 export const PALETTES = ['lavender', 'sky', 'mint', 'peach', 'rose', 'lemon'] as const;
@@ -16,7 +16,13 @@ export type Palette = (typeof PALETTES)[number];
 export const DENSITIES = ['comfortable', 'compact'] as const;
 export type Density = (typeof DENSITIES)[number];
 
-export type ResolvedTheme = 'light' | 'dark';
+/** Concrete theme applied to `<html>`. Pastel is a soft light-family theme. */
+export type ResolvedTheme = 'light' | 'dark' | 'pastel';
+
+/** Which accent variant a resolved theme uses (pastel shares the light one). */
+export function accentVariant(theme: ResolvedTheme): 'light' | 'dark' {
+  return theme === 'dark' ? 'dark' : 'light';
+}
 
 export interface AppearanceSettings {
   theme: ThemeMode;

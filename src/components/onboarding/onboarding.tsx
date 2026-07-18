@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CloudOff, HeartHandshake, Sparkles, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { getSettingsRepository } from '@/features/settings/hooks';
 
 const ONBOARDED_KEY = 'little-things.onboarded.v1';
 
@@ -31,6 +33,7 @@ const POINTS = [
  */
 export function Onboarding() {
   const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
 
   useEffect(() => {
     try {
@@ -41,6 +44,13 @@ export function Onboarding() {
   }, []);
 
   const dismiss = () => {
+    const trimmed = name.trim().slice(0, 40);
+    if (trimmed) {
+      // Save the name for gentle personalisation (best-effort).
+      getSettingsRepository()
+        .update({ displayName: trimmed })
+        .catch(() => {});
+    }
     try {
       localStorage.setItem(ONBOARDED_KEY, '1');
     } catch {
@@ -80,9 +90,28 @@ export function Onboarding() {
             ))}
           </ul>
 
-          <Button size="lg" className="w-full" onClick={dismiss}>
-            Get started
-          </Button>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              dismiss();
+            }}
+          >
+            <label htmlFor="onboarding-name" className="mb-1.5 block text-sm font-medium text-text">
+              What should we call you? <span className="font-normal text-muted">(optional)</span>
+            </label>
+            <Input
+              id="onboarding-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              autoComplete="given-name"
+              enterKeyHint="done"
+              className="mb-4"
+            />
+            <Button type="submit" size="lg" className="w-full">
+              Get started
+            </Button>
+          </form>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

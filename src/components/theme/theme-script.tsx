@@ -11,7 +11,7 @@ export function ThemeScript() {
     var d=${JSON.stringify(DEFAULT_APPEARANCE)};
     var s=d;
     try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);s={
-      theme:['system','light','dark'].indexOf(p.theme)>-1?p.theme:d.theme,
+      theme:['system','light','dark','pastel'].indexOf(p.theme)>-1?p.theme:d.theme,
       palette:['lavender','sky','mint','peach','rose','lemon'].indexOf(p.palette)>-1?p.palette:d.palette,
       density:['comfortable','compact'].indexOf(p.density)>-1?p.density:d.density,
       reducedMotion:typeof p.reducedMotion==='boolean'?p.reducedMotion:d.reducedMotion
