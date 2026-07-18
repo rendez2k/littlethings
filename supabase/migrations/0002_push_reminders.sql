@@ -40,19 +40,21 @@ create index if not exists reminders_enabled_idx on public.reminders (enabled);
 alter table public.push_subscriptions enable row level security;
 alter table public.reminders enable row level security;
 
--- Anon may WRITE (insert/update/delete) but there is deliberately no SELECT
--- policy, so the anon client cannot read any device's data. The Edge Function
--- uses the service-role key, which bypasses RLS.
+-- Both anon (signed-out) and authenticated (signed-in) clients may WRITE
+-- (insert/update/delete) but there is deliberately no SELECT policy, so no
+-- client can read any device's data. The Edge Function uses the service-role
+-- key, which bypasses RLS. Note: the optional accounts feature means a visitor
+-- may be `authenticated`, so both roles must be allowed to write.
 drop policy if exists "subs_insert" on public.push_subscriptions;
-create policy "subs_insert" on public.push_subscriptions for insert to anon with check (true);
+create policy "subs_insert" on public.push_subscriptions for insert to anon, authenticated with check (true);
 drop policy if exists "subs_update" on public.push_subscriptions;
-create policy "subs_update" on public.push_subscriptions for update to anon using (true) with check (true);
+create policy "subs_update" on public.push_subscriptions for update to anon, authenticated using (true) with check (true);
 drop policy if exists "subs_delete" on public.push_subscriptions;
-create policy "subs_delete" on public.push_subscriptions for delete to anon using (true);
+create policy "subs_delete" on public.push_subscriptions for delete to anon, authenticated using (true);
 
 drop policy if exists "rem_insert" on public.reminders;
-create policy "rem_insert" on public.reminders for insert to anon with check (true);
+create policy "rem_insert" on public.reminders for insert to anon, authenticated with check (true);
 drop policy if exists "rem_update" on public.reminders;
-create policy "rem_update" on public.reminders for update to anon using (true) with check (true);
+create policy "rem_update" on public.reminders for update to anon, authenticated using (true) with check (true);
 drop policy if exists "rem_delete" on public.reminders;
-create policy "rem_delete" on public.reminders for delete to anon using (true);
+create policy "rem_delete" on public.reminders for delete to anon, authenticated using (true);
