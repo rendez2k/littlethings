@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAppearance } from '@/components/theme/appearance-provider';
@@ -21,6 +22,7 @@ export function Stepper({
   onChange,
   min = 1,
   max = 99,
+  step = 1,
   ariaLabel,
   suffix,
 }: {
@@ -28,34 +30,83 @@ export function Stepper({
   onChange: (value: number) => void;
   min?: number;
   max?: number;
+  step?: number;
   ariaLabel: string;
   suffix?: string;
 }) {
-  const set = (v: number) => onChange(Math.min(max, Math.max(min, v)));
+  // Track the latest value so press-and-hold repeats accumulate correctly.
+  const valueRef = useRef(value);
+  valueRef.current = value;
+  const timers = useRef<{
+    delay?: ReturnType<typeof setTimeout>;
+    repeat?: ReturnType<typeof setInterval>;
+  }>({});
+
+  const clamp = (v: number) => Math.min(max, Math.max(min, v));
+
+  const bump = (dir: 1 | -1) => {
+    const next = clamp(valueRef.current + dir * step);
+    if (next !== valueRef.current) {
+      valueRef.current = next;
+      onChange(next);
+    }
+  };
+
+  const stopHold = () => {
+    if (timers.current.delay) clearTimeout(timers.current.delay);
+    if (timers.current.repeat) clearInterval(timers.current.repeat);
+    timers.current = {};
+  };
+
+  const startHold = (dir: 1 | -1) => {
+    bump(dir); // immediate first step
+    timers.current.delay = setTimeout(() => {
+      timers.current.repeat = setInterval(() => bump(dir), 80);
+    }, 350);
+  };
+
+  useEffect(() => stopHold, []);
+
+  const btn =
+    'flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-text disabled:opacity-40 select-none';
+
   return (
     <div className="inline-flex items-center gap-3" role="group" aria-label={ariaLabel}>
       <button
         type="button"
         aria-label={`Decrease ${ariaLabel}`}
-        onClick={() => set(value - 1)}
         disabled={value <= min}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-text disabled:opacity-40"
+        onPointerDown={() => startHold(-1)}
+        onPointerUp={stopHold}
+        onPointerLeave={stopHold}
+        onPointerCancel={stopHold}
+        className={btn}
       >
         <Minus className="h-4 w-4" aria-hidden="true" />
       </button>
-      <span
-        aria-live="polite"
-        className="min-w-[3.5rem] text-center text-base font-semibold text-text"
-      >
-        {value}
-        {suffix ? <span className="ml-1 text-sm font-normal text-muted">{suffix}</span> : null}
-      </span>
+      <input
+        type="number"
+        inputMode="numeric"
+        aria-label={ariaLabel}
+        value={value}
+        min={min}
+        max={max}
+        onChange={(e) => {
+          const n = Number(e.target.value);
+          if (!Number.isNaN(n)) onChange(clamp(n));
+        }}
+        className="w-16 rounded-lg bg-transparent text-center text-base font-semibold text-text [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+      {suffix ? <span className="-ml-1 text-sm font-normal text-muted">{suffix}</span> : null}
       <button
         type="button"
         aria-label={`Increase ${ariaLabel}`}
-        onClick={() => set(value + 1)}
         disabled={value >= max}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-text disabled:opacity-40"
+        onPointerDown={() => startHold(1)}
+        onPointerUp={stopHold}
+        onPointerLeave={stopHold}
+        onPointerCancel={stopHold}
+        className={btn}
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
       </button>
@@ -355,6 +406,7 @@ export function TargetPicker({
           ariaLabel="target minutes"
           min={1}
           max={1000}
+          step={5}
           suffix="minutes"
           value={value.amount}
           onChange={(amount) => onChange({ type: 'duration', amount, unit: 'minutes' })}
