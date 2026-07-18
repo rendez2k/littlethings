@@ -5,6 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { AppearanceSettings } from '@/components/settings/appearance-settings';
 import { HabitSettings } from '@/components/settings/habit-settings';
+import { ReminderSettings } from '@/components/settings/reminder-settings';
 import { DataSettings } from '@/components/settings/data-settings';
 import { AccountSettings } from '@/components/settings/account-settings';
 import { SettingsRow, SettingsSection } from '@/components/settings/settings-section';
@@ -38,6 +39,7 @@ export default function SettingsPage() {
 
       <AppearanceSettings />
       <HabitSettings />
+      <ReminderSettings />
       <DataSettings />
       <AccountSettings />
 

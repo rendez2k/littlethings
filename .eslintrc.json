@@ -13,6 +13,7 @@
     "coverage/",
     "playwright-report/",
     "test-results/",
-    "public/sw.js"
+    "public/sw.js",
+    "supabase/"
   ]
 }
