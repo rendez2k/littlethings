@@ -12,6 +12,18 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.0',
+    date: 'Personal touches',
+    items: [
+      'A new Pastel theme — soft, gently tinted surfaces.',
+      'Tell us your name at setup for a warm welcome and personal encouragement.',
+      'Kinder nudges on Today that celebrate your progress.',
+      'Faster time and count pickers — hold to change quickly, or type a value.',
+      'Look ahead: the Today date strip now moves into future weeks.',
+      'A helpful prompt to install Little Things on your home screen.',
+    ],
+  },
+  {
     version: '0.1.0',
     date: 'First release',
     items: [
