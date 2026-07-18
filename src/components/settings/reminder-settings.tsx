@@ -18,6 +18,10 @@ const REASON_MESSAGE: Record<string, string> = {
   'not-configured': 'Reminders aren’t set up for this deployment yet.',
   'store-failed': 'Couldn’t save your subscription. Please try again.',
   'bad-subscription': 'Your browser returned an unexpected subscription.',
+  'subscribe-failed':
+    'Couldn’t subscribe on this device. On iPhone, open Little Things from the Home Screen (not Safari), then try again.',
+  timeout: 'This took too long and timed out. Check your connection and try again.',
+  unexpected: 'Something went wrong. Please try again.',
 };
 
 export function ReminderSettings() {
@@ -47,23 +51,31 @@ export function ReminderSettings() {
   const turnOn = async () => {
     setBusy(true);
     setMessage(null);
-    const result = await enablePush();
-    if (result.ok) {
-      await syncReminders().catch(() => {});
-      setEnabled(true);
-      setMessage('Reminders are on for this device.');
-    } else {
-      setMessage(REASON_MESSAGE[result.reason ?? ''] ?? 'Couldn’t turn on reminders.');
+    try {
+      const result = await enablePush();
+      if (result.ok) {
+        await syncReminders().catch(() => {});
+        setEnabled(true);
+        setMessage('Reminders are on for this device.');
+      } else {
+        setMessage(REASON_MESSAGE[result.reason ?? ''] ?? 'Couldn’t turn on reminders.');
+      }
+    } catch {
+      setMessage(REASON_MESSAGE.unexpected!);
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   };
 
   const turnOff = async () => {
     setBusy(true);
-    await disablePush().catch(() => {});
-    setEnabled(false);
-    setMessage('Reminders turned off for this device.');
-    setBusy(false);
+    try {
+      await disablePush().catch(() => {});
+      setEnabled(false);
+      setMessage('Reminders turned off for this device.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (

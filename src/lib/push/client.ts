@@ -32,6 +32,25 @@ function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   return view;
 }
 
+class TimeoutError extends Error {}
+
+/** Reject if `promise` hasn't settled within `ms` — some iOS push steps hang. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new TimeoutError()), ms);
+    promise.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
+
 async function ensureRegistration(): Promise<ServiceWorkerRegistration> {
   let reg = await navigator.serviceWorker.getRegistration();
   if (!reg) reg = await navigator.serviceWorker.register('/sw.js');
@@ -51,17 +70,32 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
   const supabase = getSupabaseClient();
   if (!supabase) return { ok: false, reason: 'not-configured' };
 
-  const permission = await Notification.requestPermission();
+  let permission: NotificationPermission;
+  try {
+    permission = await Notification.requestPermission();
+  } catch {
+    return { ok: false, reason: 'denied' };
+  }
   if (permission !== 'granted') return { ok: false, reason: 'denied' };
 
-  const reg = await ensureRegistration();
-  const existing = await reg.pushManager.getSubscription();
-  const sub =
-    existing ??
-    (await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    }));
+  // Registration + subscribe can throw (e.g. iOS in Safari, not the installed
+  // app) or hang — guard both so the UI never gets stuck.
+  let sub: PushSubscription;
+  try {
+    const reg = await withTimeout(ensureRegistration(), 20_000);
+    const existing = await reg.pushManager.getSubscription();
+    sub =
+      existing ??
+      (await withTimeout(
+        reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        }),
+        20_000,
+      ));
+  } catch (err) {
+    return { ok: false, reason: err instanceof TimeoutError ? 'timeout' : 'subscribe-failed' };
+  }
 
   const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
   if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
