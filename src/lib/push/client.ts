@@ -64,7 +64,7 @@ export async function getExistingSubscription(): Promise<PushSubscription | null
 }
 
 /** Request permission, subscribe, and store the subscription in Supabase. */
-export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
+export async function enablePush(): Promise<{ ok: boolean; reason?: string; detail?: string }> {
   if (!isPushSupported()) return { ok: false, reason: 'unsupported' };
   if (!VAPID_PUBLIC_KEY) return { ok: false, reason: 'not-configured' };
   const supabase = getSupabaseClient();
@@ -94,7 +94,11 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
         20_000,
       ));
   } catch (err) {
-    return { ok: false, reason: err instanceof TimeoutError ? 'timeout' : 'subscribe-failed' };
+    return {
+      ok: false,
+      reason: err instanceof TimeoutError ? 'timeout' : 'subscribe-failed',
+      detail: err instanceof Error ? `${err.name}: ${err.message}` : String(err),
+    };
   }
 
   const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
@@ -108,7 +112,7 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
       { endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth },
       { onConflict: 'endpoint' },
     );
-  if (error) return { ok: false, reason: 'store-failed' };
+  if (error) return { ok: false, reason: 'store-failed', detail: error.message };
   return { ok: true };
 }
 

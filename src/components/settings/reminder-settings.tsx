@@ -58,7 +58,8 @@ export function ReminderSettings() {
         setEnabled(true);
         setMessage('Reminders are on for this device.');
       } else {
-        setMessage(REASON_MESSAGE[result.reason ?? ''] ?? 'Couldn’t turn on reminders.');
+        const base = REASON_MESSAGE[result.reason ?? ''] ?? 'Couldn’t turn on reminders.';
+        setMessage(result.detail ? `${base} (${result.detail})` : base);
       }
     } catch {
       setMessage(REASON_MESSAGE.unexpected!);
