@@ -94,10 +94,15 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string; deta
         20_000,
       ));
   } catch (err) {
+    const base = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    // Fingerprint of the key the browser actually loaded, to spot a mis-pasted
+    // NEXT_PUBLIC_VAPID_PUBLIC_KEY (expected len 87, BGHGY0…qlVAXk).
+    const k = VAPID_PUBLIC_KEY ?? '';
+    const fp = `key len=${k.length} ${k.slice(0, 6)}…${k.slice(-6)}`;
     return {
       ok: false,
       reason: err instanceof TimeoutError ? 'timeout' : 'subscribe-failed',
-      detail: err instanceof Error ? `${err.name}: ${err.message}` : String(err),
+      detail: `${base} [${fp}]`,
     };
   }
 
