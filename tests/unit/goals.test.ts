@@ -32,6 +32,18 @@ describe('GoalService', () => {
     expect(goal.targetDate).toBe('2024-12-31');
   });
 
+  it('defaults an icon and keeps a chosen one', async () => {
+    const { service } = setup();
+    const fallback = await service.create({ title: 'Something vague' });
+    expect(fallback.icon).toBe('target');
+
+    const chosen = await service.create({ title: 'Visit Japan', icon: 'plane' });
+    expect(chosen.icon).toBe('plane');
+
+    const updated = await service.update(chosen.id, { icon: 'mountain' });
+    expect(updated.icon).toBe('mountain');
+  });
+
   it('soft-deletes a goal', async () => {
     const { repo, service } = setup();
     const goal = await service.create({ title: 'Temp' });

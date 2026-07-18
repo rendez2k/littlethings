@@ -1,5 +1,6 @@
 import { newId, nowIso } from '@/lib/id';
 import { createGoalRepository, type GoalRepository } from './repository';
+import { DEFAULT_GOAL_ICON } from './icons';
 import { goalSchema, type Goal, type GoalDraft } from './schemas';
 
 export interface GoalService {
@@ -25,6 +26,7 @@ export function createGoalService(goals: GoalRepository = createGoalRepository()
         id: newId(),
         title: draft.title.trim(),
         notes: draft.notes?.trim() ? draft.notes.trim() : undefined,
+        icon: draft.icon ?? DEFAULT_GOAL_ICON,
         targetDate: draft.targetDate ?? null,
         done: false,
         doneAt: null,
@@ -43,6 +45,7 @@ export function createGoalService(goals: GoalRepository = createGoalRepository()
         ...current,
         title: patch.title?.trim() ?? current.title,
         notes: patch.notes === undefined ? current.notes : patch.notes?.trim() || undefined,
+        icon: patch.icon ?? current.icon ?? DEFAULT_GOAL_ICON,
         targetDate:
           patch.targetDate === undefined ? current.targetDate : (patch.targetDate ?? null),
         updatedAt: nowIso(now),

@@ -9,6 +9,8 @@ test('add a bucket-list goal and mark it done', async ({ page }) => {
   await page.getByRole('button', { name: 'Add a goal' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByLabel('Goal', { exact: true }).fill('Visit Japan');
+  // The icon is suggested from the title ("Visit Japan" → plane).
+  await expect(page.getByRole('radio', { name: 'plane' })).toBeChecked();
   await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(page.getByText('Visit Japan')).toBeVisible();
