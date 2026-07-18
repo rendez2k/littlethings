@@ -3,6 +3,7 @@
 import { getSettingsRepository, useAppSettings } from '@/features/settings/hooks';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { SettingsRow, SettingsSection } from './settings-section';
 
 export function HabitSettings() {
@@ -12,6 +13,16 @@ export function HabitSettings() {
 
   return (
     <SettingsSection title="Habits">
+      <SettingsRow label="Your name" description="Used for gentle, personal encouragement.">
+        <Input
+          aria-label="Your name"
+          value={settings.displayName}
+          maxLength={40}
+          placeholder="Your name"
+          onChange={(e) => update({ displayName: e.target.value.slice(0, 40) })}
+        />
+      </SettingsRow>
+
       <SettingsRow label="First day of week">
         <SegmentedControl
           ariaLabel="First day of week"
