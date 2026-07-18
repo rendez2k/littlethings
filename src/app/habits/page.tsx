@@ -1,0 +1,138 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ListTodo, Plus, Search } from 'lucide-react';
+import { PageHeader } from '@/components/layout/page-header';
+import { PlaceholderPanel } from '@/components/ui/placeholder-panel';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { HabitListRow } from '@/components/habits/habit-list-row';
+import { useHabitEditor } from '@/components/habits/habit-editor-provider';
+import { getHabitService, useActiveHabits, useArchivedHabits } from '@/features/habits/hooks';
+import type { Habit } from '@/features/habits/schemas';
+
+export default function HabitsPage() {
+  const active = useActiveHabits();
+  const archived = useArchivedHabits();
+  const { openCreate, openEdit } = useHabitEditor();
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+
+  const open = (habit: Habit) => router.push(`/habits/${habit.id}`);
+
+  const totalCount = (active?.length ?? 0) + (archived?.length ?? 0);
+  const showSearch = totalCount > 5;
+
+  const needle = query.trim().toLowerCase();
+  const visibleActive = useMemo(
+    () => (active ?? []).filter((h) => h.name.toLowerCase().includes(needle)),
+    [active, needle],
+  );
+  const visibleArchived = useMemo(
+    () => (archived ?? []).filter((h) => h.name.toLowerCase().includes(needle)),
+    [archived, needle],
+  );
+
+  const moveActive = async (index: number, delta: number) => {
+    if (!active) return;
+    const next = [...active];
+    const target = index + delta;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target]!, next[index]!];
+    await getHabitService().reorder(next.map((h) => h.id));
+  };
+
+  const addButton = (
+    <Button size="sm" aria-label="Add habit" className="h-11 w-11 p-0" onClick={() => openCreate()}>
+      <Plus aria-hidden="true" className="h-5 w-5" />
+    </Button>
+  );
+
+  if (active === undefined) {
+    return <PageHeader title="Habits" subtitle=" " action={addButton} />;
+  }
+
+  const empty = totalCount === 0;
+
+  return (
+    <>
+      <PageHeader title="Habits" subtitle="Everything you're building" action={addButton} />
+
+      {empty ? (
+        <PlaceholderPanel
+          icon={ListTodo}
+          title="No habits yet"
+          description="Create your first habit to start building better days."
+          action={
+            <Button onClick={() => openCreate()}>
+              <Plus aria-hidden="true" className="h-4 w-4" />
+              Add a habit
+            </Button>
+          }
+        />
+      ) : (
+        <div className="space-y-6">
+          {showSearch ? (
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+                aria-hidden="true"
+              />
+              <Input
+                type="search"
+                aria-label="Search habits"
+                placeholder="Search habits"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          ) : null}
+
+          {visibleActive.length > 0 ? (
+            <section>
+              <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
+                Active
+              </h2>
+              <ul className="space-y-3">
+                {visibleActive.map((habit, i) => (
+                  <li key={habit.id}>
+                    <HabitListRow
+                      habit={habit}
+                      onOpen={open}
+                      onEdit={openEdit}
+                      onMoveUp={!query && i > 0 ? () => moveActive(i, -1) : undefined}
+                      onMoveDown={
+                        !query && i < visibleActive.length - 1 ? () => moveActive(i, 1) : undefined
+                      }
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {visibleArchived.length > 0 ? (
+            <section>
+              <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
+                Archived
+              </h2>
+              <ul className="space-y-3">
+                {visibleArchived.map((habit) => (
+                  <li key={habit.id}>
+                    <HabitListRow habit={habit} onOpen={open} onEdit={openEdit} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {query && visibleActive.length === 0 && visibleArchived.length === 0 ? (
+            <p className="px-1 text-sm text-muted">No habits match “{query}”.</p>
+          ) : null}
+        </div>
+      )}
+    </>
+  );
+}
