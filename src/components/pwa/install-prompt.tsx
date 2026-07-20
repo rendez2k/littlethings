@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Download, Share, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { isNativeApp } from '@/lib/platform';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -12,14 +13,6 @@ interface BeforeInstallPromptEvent extends Event {
 
 const DISMISSED_KEY = 'little-things.install-dismissed.v1';
 const ONBOARDED_KEY = 'little-things.onboarded.v1';
-
-function isStandalone(): boolean {
-  if (typeof window === 'undefined') return false;
-  return (
-    window.matchMedia?.('(display-mode: standalone)').matches ||
-    (navigator as unknown as { standalone?: boolean }).standalone === true
-  );
-}
 
 function isIos(): boolean {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -35,7 +28,7 @@ export function InstallPrompt() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    if (isStandalone()) return; // already installed
+    if (isNativeApp()) return; // already installed / running natively
     let dismissed = false;
     let onboarded = false;
     try {

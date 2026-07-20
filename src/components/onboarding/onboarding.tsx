@@ -63,7 +63,12 @@ export function Onboarding() {
     <Dialog.Root open={open} onOpenChange={(o) => (!o ? dismiss() : undefined)}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm data-[state=open]:animate-fade-in" />
-        <Dialog.Content className="fixed inset-x-0 bottom-0 z-[70] mx-auto max-w-app rounded-t-sheet border border-border bg-elevated p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-sheet data-[state=open]:animate-sheet-in">
+        <Dialog.Content
+          // Don't auto-focus the name field on open — on mobile that forces the
+          // keyboard open over the welcome screen. The field stays optional.
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="fixed inset-x-0 bottom-0 z-[70] mx-auto max-w-app rounded-t-sheet border border-border bg-elevated p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-sheet data-[state=open]:animate-sheet-in"
+        >
           <div className="mb-5 flex flex-col items-center text-center">
             <span className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary text-primary-foreground shadow-card">
               <Sparkles className="h-8 w-8" aria-hidden="true" />
