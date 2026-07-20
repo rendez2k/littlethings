@@ -201,6 +201,11 @@
 }
 
 html {
+  /* Fill the viewport incl. the safe areas from the very first paint, so the
+   * status-bar/home-indicator regions show the app background instead of a
+   * white flash that makes the top bar appear to jump on launch. */
+  min-height: 100dvh;
+  background-color: rgb(var(--color-background));
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }

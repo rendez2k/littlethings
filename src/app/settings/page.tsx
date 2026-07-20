@@ -11,6 +11,7 @@ import { AccountSettings } from '@/components/settings/account-settings';
 import { SettingsRow, SettingsSection } from '@/components/settings/settings-section';
 import { Footer } from '@/components/layout/footer';
 import { APP_VERSION } from '@/lib/constants';
+import { useIsNativeApp } from '@/lib/platform';
 
 function LinkRow({
   href,
@@ -33,6 +34,7 @@ function LinkRow({
 }
 
 export default function SettingsPage() {
+  const isNative = useIsNativeApp();
   return (
     <>
       <PageHeader title="Settings" />
@@ -48,12 +50,14 @@ export default function SettingsPage() {
           label="Version"
           control={<span className="text-sm text-muted">{APP_VERSION}</span>}
         />
-        <LinkRow href="/whats-new" label="What's new" />
-        <LinkRow
-          href="/settings/install"
-          label="Install Little Things"
-          description="Add it to your home screen"
-        />
+        {!isNative ? <LinkRow href="/whats-new" label="What's new" /> : null}
+        {!isNative ? (
+          <LinkRow
+            href="/settings/install"
+            label="Install Little Things"
+            description="Add it to your home screen"
+          />
+        ) : null}
         <LinkRow href="/settings/privacy" label="Privacy" />
         <LinkRow href="/settings/terms" label="Terms" />
         <a href="mailto:redwards2k@gmail.com?subject=Little%20Things%20feedback" className="block">

@@ -12,6 +12,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.5',
+    date: 'Feels more like an app',
+    items: [
+      'A steadier launch when installed to your Home Screen — no keyboard springing open, no top-bar jump.',
+      'The menu tidies itself once installed, hiding the bits you only need in a browser.',
+    ],
+  },
+  {
     version: '0.2.1',
     date: 'A face for every goal',
     items: [
