@@ -12,6 +12,20 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.8',
+    date: 'A little buzz',
+    items: [
+      'A gentle haptic tap when you tick off a habit, hit a count goal, or finish a bucket-list goal (on supported devices).',
+    ],
+  },
+  {
+    version: '0.2.7',
+    date: 'Bottom bar, truly pinned',
+    items: [
+      'The bottom bar now sits correctly from the very first frame on iPhone — no more starting high and dropping into place after you tap or rotate.',
+    ],
+  },
+  {
     version: '0.2.6',
     date: 'A rock-steady bottom bar',
     items: [

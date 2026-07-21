@@ -4,6 +4,7 @@ import { Check, Flag } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { getGoalService } from '@/features/goals/hooks';
 import { getGoalIcon } from '@/features/goals/icons';
+import { completionHaptic } from '@/lib/haptics';
 import type { Goal } from '@/features/goals/schemas';
 import { fromDateKey } from '@/lib/dates';
 
@@ -16,7 +17,10 @@ export function GoalRow({ goal, onEdit }: { goal: Goal; onEdit: (goal: Goal) => 
         role="checkbox"
         aria-checked={goal.done}
         aria-label={goal.done ? `Mark ${goal.title} not done` : `Mark ${goal.title} done`}
-        onClick={() => getGoalService().toggleDone(goal.id)}
+        onClick={() => {
+          if (!goal.done) completionHaptic();
+          getGoalService().toggleDone(goal.id);
+        }}
         className={cn(
           'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-transform active:scale-90',
           goal.done
