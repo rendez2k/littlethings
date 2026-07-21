@@ -200,11 +200,17 @@
   border-color: rgb(var(--color-border));
 }
 
+html,
+body {
+  /* Lock the document so it can't scroll or rubber-band on iOS. The app shell
+   * is pinned (position: fixed) and its content region scrolls internally, so
+   * the page — and the bottom bar riding on it — can never be dragged. */
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 html {
-  /* Fill the viewport incl. the safe areas from the very first paint, so the
-   * status-bar/home-indicator regions show the app background instead of a
-   * white flash that makes the top bar appear to jump on launch. */
-  min-height: 100dvh;
   background-color: rgb(var(--color-background));
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -216,8 +222,9 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Prevent rubber-banding revealing a mismatched colour behind the shell. */
-  overscroll-behavior-y: none;
+  /* iOS Safari also respects a fixed body for locking overscroll. */
+  position: fixed;
+  inset: 0;
 }
 
 /* Respect reduced motion globally; the app also reads a stored preference. */
