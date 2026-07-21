@@ -12,6 +12,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.8',
+    date: 'A little buzz',
+    items: [
+      'A gentle haptic tap when you tick off a habit, hit a count goal, or finish a bucket-list goal (on supported devices).',
+    ],
+  },
+  {
     version: '0.2.7',
     date: 'Bottom bar, truly pinned',
     items: [

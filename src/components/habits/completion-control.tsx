@@ -10,6 +10,7 @@ import type { DayStatus } from '@/features/completions/logic';
 import type { Completion } from '@/features/completions/schemas';
 import type { Habit } from '@/features/habits/schemas';
 import { getCompletionService } from '@/features/habits/hooks';
+import { completionHaptic } from '@/lib/haptics';
 import type { DateKey } from '@/lib/dates';
 
 interface Props {
@@ -35,7 +36,10 @@ export function CompletionControl({ habit, completion, status, date, disabled }:
         onColor={accent.on}
         reducedMotion={appearance.reducedMotion}
         label={complete ? `Mark ${habit.name} not done` : `Mark ${habit.name} done`}
-        onClick={() => service.toggle(habit.id, date)}
+        onClick={() => {
+          if (!complete) completionHaptic();
+          service.toggle(habit.id, date);
+        }}
       />
     );
   }
@@ -73,7 +77,11 @@ export function CompletionControl({ habit, completion, status, date, disabled }:
         type="button"
         aria-label={`Increase ${habit.name}`}
         disabled={disabled}
-        onClick={() => service.increment(habit.id, date, step)}
+        onClick={() => {
+          // Buzz only when this tap reaches the goal, not on every increment.
+          if (value < goal && value + step >= goal) completionHaptic();
+          service.increment(habit.id, date, step);
+        }}
         className="flex h-8 w-8 items-center justify-center rounded-full disabled:opacity-30"
         style={{ color: accent.accent }}
       >
