@@ -200,20 +200,23 @@
   border-color: rgb(var(--color-border));
 }
 
-html,
-body {
-  /* Lock the document so it can't scroll or rubber-band on iOS. The app shell
-   * is pinned (position: fixed) and its content region scrolls internally, so
-   * the page — and the bottom bar riding on it — can never be dragged. */
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
 html {
+  /* Fill the viewport (incl. safe areas) so the status-bar / home-indicator
+   * regions show the app background, not a white flash. */
+  min-height: 100dvh;
   background-color: rgb(var(--color-background));
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+html,
+body {
+  /* Lock the document scroll so the page can't rubber-band on iOS. The app
+   * shell is pinned (position: fixed) and its content region scrolls
+   * internally, so nothing drags the page or the bottom bar. This does NOT
+   * resize the shell — a fixed body would, leaving a gap at the bottom. */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
@@ -222,9 +225,6 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* iOS Safari also respects a fixed body for locking overscroll. */
-  position: fixed;
-  inset: 0;
 }
 
 /* Respect reduced motion globally; the app also reads a stored preference. */

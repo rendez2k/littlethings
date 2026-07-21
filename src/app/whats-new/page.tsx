@@ -12,6 +12,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.10',
+    date: 'Closing the gap',
+    items: [
+      'Fixed a big empty gap that appeared below the bottom bar — the app fills the screen again while the page stays put.',
+    ],
+  },
+  {
     version: '0.2.9',
     date: 'No more bouncing',
     items: [
