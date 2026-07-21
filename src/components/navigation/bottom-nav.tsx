@@ -17,7 +17,7 @@ export function BottomNav() {
     <nav
       aria-label="Primary"
       className={cn(
-        'fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/85 backdrop-blur-lg',
+        'z-40 shrink-0 border-t border-border bg-surface/85 backdrop-blur-lg',
         'pb-safe-bottom',
       )}
     >
