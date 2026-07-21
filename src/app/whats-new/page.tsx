@@ -12,6 +12,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.6',
+    date: 'A rock-steady bottom bar',
+    items: [
+      'The bottom navigation now stays put at the bottom on every screen — no more shifting between pages when installed.',
+    ],
+  },
+  {
     version: '0.2.5',
     date: 'Feels more like an app',
     items: [
