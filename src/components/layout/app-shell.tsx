@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="fixed inset-0 overflow-hidden">
       <div className="mx-auto flex h-full w-full max-w-app flex-col pt-safe-top">
         <OfflineIndicator />
-        <main id="main-content" className="flex-1 overflow-y-auto px-4 pb-6">
+        <main id="main-content" className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6">
           {children}
         </main>
         <BottomNav />

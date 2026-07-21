@@ -12,6 +12,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.9',
+    date: 'No more bouncing',
+    items: [
+      'Fixed the whole page (and bottom bar) sliding up and down on iPhone — the screen now stays put while only your list scrolls.',
+    ],
+  },
+  {
     version: '0.2.8',
     date: 'A little buzz',
     items: [
