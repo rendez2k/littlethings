@@ -6,6 +6,7 @@ import { CloudOff, HeartHandshake, Sparkles, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getSettingsRepository } from '@/features/settings/hooks';
+import { isScreenshotMode, applyScreenshotMode } from '@/lib/screenshot-mode';
 
 const ONBOARDED_KEY = 'little-things.onboarded.v1';
 
@@ -37,6 +38,12 @@ export function Onboarding() {
 
   useEffect(() => {
     try {
+      // LaunchKit store-screenshot mode (?lkshot=1): skip the welcome sheet and
+      // seed sample data so captures show a populated app, not onboarding.
+      if (isScreenshotMode()) {
+        void applyScreenshotMode();
+        return;
+      }
       if (!localStorage.getItem(ONBOARDED_KEY)) setOpen(true);
     } catch {
       // Ignore storage errors; simply don't show onboarding.
