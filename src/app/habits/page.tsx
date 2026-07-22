@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { HabitListRow } from '@/components/habits/habit-list-row';
 import { useHabitEditor } from '@/components/habits/habit-editor-provider';
 import { getHabitService, useActiveHabits, useArchivedHabits } from '@/features/habits/hooks';
+import { groupHabits } from '@/features/habits/categories';
 import type { Habit } from '@/features/habits/schemas';
 
 export default function HabitsPage() {
@@ -34,13 +35,20 @@ export default function HabitsPage() {
     [archived, needle],
   );
 
-  const moveActive = async (index: number, delta: number) => {
+  const groups = useMemo(() => groupHabits(visibleActive), [visibleActive]);
+
+  // Reorder within a group by swapping the two habits' positions in the full
+  // active order (which is what `reorder` persists).
+  const moveInGroup = async (groupItems: Habit[], index: number, delta: number) => {
     if (!active) return;
-    const next = [...active];
     const target = index + delta;
-    if (target < 0 || target >= next.length) return;
-    [next[index], next[target]] = [next[target]!, next[index]!];
-    await getHabitService().reorder(next.map((h) => h.id));
+    if (target < 0 || target >= groupItems.length) return;
+    const order = active.map((h) => h.id);
+    const ia = order.indexOf(groupItems[index]!.id);
+    const ib = order.indexOf(groupItems[target]!.id);
+    if (ia < 0 || ib < 0) return;
+    [order[ia], order[ib]] = [order[ib]!, order[ia]!];
+    await getHabitService().reorder(order);
   };
 
   const addButton = (
@@ -90,28 +98,30 @@ export default function HabitsPage() {
             </div>
           ) : null}
 
-          {visibleActive.length > 0 ? (
-            <section>
+          {groups.map((group) => (
+            <section key={group.key}>
               <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-                Active
+                {group.label}
               </h2>
               <ul className="space-y-3">
-                {visibleActive.map((habit, i) => (
+                {group.habits.map((habit, i) => (
                   <li key={habit.id}>
                     <HabitListRow
                       habit={habit}
                       onOpen={open}
                       onEdit={openEdit}
-                      onMoveUp={!query && i > 0 ? () => moveActive(i, -1) : undefined}
+                      onMoveUp={!query && i > 0 ? () => moveInGroup(group.habits, i, -1) : undefined}
                       onMoveDown={
-                        !query && i < visibleActive.length - 1 ? () => moveActive(i, 1) : undefined
+                        !query && i < group.habits.length - 1
+                          ? () => moveInGroup(group.habits, i, 1)
+                          : undefined
                       }
                     />
                   </li>
                 ))}
               </ul>
             </section>
-          ) : null}
+          ))}
 
           {visibleArchived.length > 0 ? (
             <section>
