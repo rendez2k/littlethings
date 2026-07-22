@@ -12,6 +12,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.11',
+    date: 'Tidier habit list',
+    items: [
+      'The Habits tab now groups your habits into Multiple times a day, Daily and Weekly, so the list is easier to scan.',
+    ],
+  },
+  {
     version: '0.2.10',
     date: 'Closing the gap',
     items: [

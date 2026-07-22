@@ -84,10 +84,10 @@ test('archive, restore and delete a habit with confirmation', async ({ page }) =
   await page.getByRole('menuitem', { name: 'Archive' }).click();
   await expect(page.getByRole('heading', { name: 'Archived' })).toBeVisible();
 
-  // Restore.
+  // Restore — a default habit (daily) lands in the "Daily" group.
   await page.getByRole('button', { name: 'Actions for Read' }).click();
   await page.getByRole('menuitem', { name: 'Restore' }).click();
-  await expect(page.getByRole('heading', { name: 'Active' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Daily' })).toBeVisible();
 
   // Delete with confirmation.
   await page.getByRole('button', { name: 'Actions for Read' }).click();
