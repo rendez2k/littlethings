@@ -33,6 +33,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type}
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-full font-semibold transition',
+        'transition-transform duration-150 ease-spring motion-safe:active:scale-[0.97]',
         'disabled:pointer-events-none disabled:opacity-50',
         variantClasses[variant],
         sizeClasses[size],

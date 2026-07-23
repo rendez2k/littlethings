@@ -58,7 +58,7 @@ export default function GoalsPage() {
           {openGoals.length > 0 ? (
             <ul className="space-y-3">
               {openGoals.map((goal) => (
-                <li key={goal.id}>
+                <li key={goal.id} className="motion-safe:animate-row-in">
                   <GoalRow goal={goal} onEdit={openEdit} />
                 </li>
               ))}
@@ -72,7 +72,7 @@ export default function GoalsPage() {
               </h2>
               <ul className="space-y-3">
                 {doneGoals.map((goal) => (
-                  <li key={goal.id}>
+                  <li key={goal.id} className="motion-safe:animate-row-in">
                     <GoalRow goal={goal} onEdit={openEdit} />
                   </li>
                 ))}

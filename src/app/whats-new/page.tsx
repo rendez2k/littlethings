@@ -12,6 +12,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.13',
+    date: 'Swipe & spring',
+    items: [
+      'Swipe a habit left to delete, or right to edit — with a soft, springy snap.',
+      'Gentle new touches throughout: rows ease in, buttons give a little spring when pressed.',
+    ],
+  },
+  {
     version: '0.2.12',
     date: 'One-offs, groups & confetti',
     items: [

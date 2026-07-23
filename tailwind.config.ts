@@ -59,6 +59,7 @@ const config: Config = {
       },
       transitionTimingFunction: {
         ios: 'cubic-bezier(0.32, 0.72, 0, 1)',
+        spring: 'cubic-bezier(0.34, 1.3, 0.5, 1)',
       },
       keyframes: {
         'sheet-in': {
@@ -74,11 +75,16 @@ const config: Config = {
           '50%': { transform: 'scale(1.15)' },
           '100%': { transform: 'scale(1)' },
         },
+        'row-in': {
+          from: { opacity: '0', transform: 'translateY(6px)' },
+          to: { opacity: '1', transform: 'none' },
+        },
       },
       animation: {
         'sheet-in': 'sheet-in 0.32s cubic-bezier(0.32, 0.72, 0, 1)',
         'fade-in': 'fade-in 0.2s ease-out',
         pop: 'pulse 0.26s ease-out',
+        'row-in': 'row-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both',
       },
     },
   },
