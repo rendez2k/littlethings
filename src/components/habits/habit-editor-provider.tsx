@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/components/ui/confirm-dialog';
 import { getHabitService } from '@/features/habits/hooks';
 import { syncReminders } from '@/features/reminders/sync';
+import { syncLocalNotifications } from '@/features/reminders/local-sync';
 import { emptyDraft, habitToDraft } from '@/features/habits/draft';
 import { templateToDraft, type HabitTemplate } from '@/features/habits/templates';
 import type { Habit, HabitDraft } from '@/features/habits/schemas';
@@ -77,7 +78,10 @@ export function HabitEditorProvider({ children }: { children: ReactNode }) {
         } else {
           await getHabitService().create(draft);
         }
-        void syncReminders(); // keep push reminders in step (best-effort)
+        // Keep reminders in step (best-effort): Web Push on browsers, native
+        // local notifications in the app. Each no-ops when not applicable.
+        void syncReminders();
+        void syncLocalNotifications();
         close();
       } finally {
         setSubmitting(false);
@@ -97,6 +101,7 @@ export function HabitEditorProvider({ children }: { children: ReactNode }) {
     if (!ok) return;
     await getHabitService().softDelete(state.habit.id);
     void syncReminders();
+    void syncLocalNotifications();
     close();
   }, [state, close, confirm]);
 

@@ -12,6 +12,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.14',
+    date: 'Reminders that reach Android',
+    items: [
+      'Reminders now work natively on Android and iPhone in the app — scheduled right on your device, no account needed.',
+      'Swipe right to edit on Today too (not just delete).',
+    ],
+  },
+  {
     version: '0.2.13',
     date: 'Swipe & spring',
     items: [
