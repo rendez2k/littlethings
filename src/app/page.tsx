@@ -56,6 +56,15 @@ export default function TodayPage() {
     return grouped;
   }, [allCompletions]);
 
+  // Habit ids completed at least once — lets one-offs linger on today until done.
+  const everCompletedHabitIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const c of allCompletions ?? []) {
+      if (!c.deletedAt) ids.add(c.habitId);
+    }
+    return ids;
+  }, [allCompletions]);
+
   if (habits === undefined || today === null || selectedDate === null) {
     return <PageHeader title="Today" subtitle=" " />;
   }
@@ -64,7 +73,13 @@ export default function TodayPage() {
     return <Welcome />;
   }
 
-  const view = buildDayView(habits, completionsForDate ?? [], selectedDate, today);
+  const view = buildDayView(
+    habits,
+    completionsForDate ?? [],
+    selectedDate,
+    today,
+    everCompletedHabitIds,
+  );
   const isToday = selectedDate === today;
   const doneCount = view.summary.completed + view.summary.skipped;
   const encourageLine = settings.showMotivationalMessages

@@ -50,4 +50,33 @@ describe('buildDayView', () => {
     expect(view.entries).toHaveLength(0);
     expect(view.summary.ratio).toBe(0);
   });
+
+  describe('one-off carry-over', () => {
+    const oneOff = makeHabit({ startDate: '2024-05-10', schedule: { type: 'once' } });
+
+    it('keeps an unfinished one-off on today, even after its start date', () => {
+      const view = buildDayView([oneOff], [], TODAY, TODAY, new Set());
+      expect(view.entries.map((e) => e.habit.id)).toEqual([oneOff.id]);
+      expect(view.entries[0]!.status).toBe('pending');
+    });
+
+    it('shows a one-off completed today as complete', () => {
+      const completion = makeCompletion(oneOff.id, TODAY, { state: 'complete', value: 1 });
+      const view = buildDayView([oneOff], [completion], TODAY, TODAY, new Set([oneOff.id]));
+      expect(view.entries).toHaveLength(1);
+      expect(view.entries[0]!.status).toBe('complete');
+    });
+
+    it('drops a one-off finished on an earlier day', () => {
+      // Completed before (in everCompletedHabitIds) but no completion for today.
+      const view = buildDayView([oneOff], [], TODAY, TODAY, new Set([oneOff.id]));
+      expect(view.entries).toHaveLength(0);
+    });
+
+    it('does not carry one-offs onto past days (only today)', () => {
+      const past = '2024-05-12';
+      const view = buildDayView([oneOff], [], past, TODAY, new Set());
+      expect(view.entries).toHaveLength(0);
+    });
+  });
 });

@@ -4,12 +4,14 @@ import { Check, Flag } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { getGoalService } from '@/features/goals/hooks';
 import { getGoalIcon } from '@/features/goals/icons';
-import { completionHaptic } from '@/lib/haptics';
+import { celebrateCompletion } from '@/lib/celebrate';
+import { useAppearance } from '@/components/theme/appearance-provider';
 import type { Goal } from '@/features/goals/schemas';
 import { fromDateKey } from '@/lib/dates';
 
 export function GoalRow({ goal, onEdit }: { goal: Goal; onEdit: (goal: Goal) => void }) {
   const Icon = getGoalIcon(goal.icon);
+  const { appearance } = useAppearance();
   return (
     <div className="flex items-center gap-3 rounded-card border border-border bg-surface p-3 shadow-card">
       <button
@@ -17,8 +19,8 @@ export function GoalRow({ goal, onEdit }: { goal: Goal; onEdit: (goal: Goal) => 
         role="checkbox"
         aria-checked={goal.done}
         aria-label={goal.done ? `Mark ${goal.title} not done` : `Mark ${goal.title} done`}
-        onClick={() => {
-          if (!goal.done) completionHaptic();
+        onClick={(e) => {
+          if (!goal.done) celebrateCompletion(e.currentTarget, appearance.reducedMotion);
           getGoalService().toggleDone(goal.id);
         }}
         className={cn(

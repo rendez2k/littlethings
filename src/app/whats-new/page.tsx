@@ -12,6 +12,15 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.12',
+    date: 'One-offs, groups & confetti',
+    items: [
+      'A little confetti when you complete a habit or finish a goal (respects Reduced motion).',
+      'One-off habits now wait for you on Today until you get to them, then tick off and drift away.',
+      'More precise Habits groups: Every few days, Monthly and One-off are their own sections now.',
+    ],
+  },
+  {
     version: '0.2.11',
     date: 'Tidier habit list',
     items: [
