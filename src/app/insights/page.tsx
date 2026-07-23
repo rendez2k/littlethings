@@ -10,6 +10,8 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useActiveHabits, useAllCompletions } from '@/features/habits/hooks';
 import { useAppSettings } from '@/features/settings/hooks';
 import { computeInsights, type InsightsRange } from '@/features/insights/insights';
+import { HabitHistoryCard } from '@/components/insights/habit-history-card';
+import type { Completion } from '@/features/completions/schemas';
 import { todayKey, type Weekday } from '@/lib/dates';
 
 const ChartFallback = () => <div className="h-32 animate-pulse rounded-lg bg-border/40" />;
@@ -65,6 +67,16 @@ export default function InsightsPage() {
     if (!habits || !completions || !today) return null;
     return computeInsights(habits, completions, range, today, settings.weekStartsOn);
   }, [habits, completions, today, range, settings.weekStartsOn]);
+
+  const completionsByHabit = useMemo(() => {
+    const grouped = new Map<string, Completion[]>();
+    for (const c of completions ?? []) {
+      const list = grouped.get(c.habitId) ?? [];
+      list.push(c);
+      grouped.set(c.habitId, list);
+    }
+    return grouped;
+  }, [completions]);
 
   if (!insights || habits === undefined) {
     return <PageHeader title="Insights" subtitle="Your progress at a glance" />;
@@ -165,6 +177,25 @@ export default function InsightsPage() {
           </p>
         </div>
       )}
+
+      {today ? (
+        <section className="mt-6">
+          <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
+            History
+          </h2>
+          <div className="space-y-3">
+            {habits.map((habit) => (
+              <HabitHistoryCard
+                key={habit.id}
+                habit={habit}
+                completions={completionsByHabit.get(habit.id) ?? []}
+                today={today}
+                weekStartsOn={settings.weekStartsOn}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
     </>
   );
 }

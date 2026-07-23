@@ -12,6 +12,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.15',
+    date: 'See your history',
+    items: [
+      'A new History section in Insights — a colourful contribution heatmap for every habit, with your current and best streaks.',
+      'A little history sparkline on each row in the Habits tab, in the habit’s colour.',
+    ],
+  },
+  {
     version: '0.2.14',
     date: 'Reminders that reach Android',
     items: [

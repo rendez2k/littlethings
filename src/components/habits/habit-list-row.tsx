@@ -6,7 +6,10 @@ import { getHabitIcon } from '@/features/habits/icons';
 import { getHabitAccent } from '@/features/habits/colors';
 import { scheduleLabel, targetLabel } from '@/features/habits/labels';
 import type { Habit } from '@/features/habits/schemas';
+import type { Completion } from '@/features/completions/schemas';
+import type { DateKey, WeekStart } from '@/lib/dates';
 import { SwipeableRow, type SwipeAction } from '@/components/ui/swipeable-row';
+import { HabitHeatmap } from '@/components/charts/habit-heatmap';
 import { useDeleteHabit } from './use-delete-habit';
 import { HabitActionsMenu } from './habit-actions-menu';
 
@@ -17,10 +20,24 @@ interface Props {
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onDeleted?: () => void;
+  /** Optional recent history sparkline (Habits list). */
+  completions?: Completion[];
+  today?: DateKey | null;
+  weekStartsOn?: WeekStart;
 }
 
 /** A habit row for the Habits screen: tappable info, swipe actions + a menu. */
-export function HabitListRow({ habit, onOpen, onEdit, onMoveUp, onMoveDown, onDeleted }: Props) {
+export function HabitListRow({
+  habit,
+  onOpen,
+  onEdit,
+  onMoveUp,
+  onMoveDown,
+  onDeleted,
+  completions,
+  today,
+  weekStartsOn = 1,
+}: Props) {
   const { resolvedTheme, appearance } = useAppearance();
   const Icon = getHabitIcon(habit.icon);
   const { accent, soft } = getHabitAccent(habit.color, resolvedTheme);
@@ -72,6 +89,19 @@ export function HabitListRow({ habit, onOpen, onEdit, onMoveUp, onMoveDown, onDe
             </span>
           </span>
         </button>
+        {today && completions && habit.status !== 'archived' ? (
+          <div className="shrink-0" aria-hidden="true">
+            <HabitHeatmap
+              habit={habit}
+              completions={completions}
+              today={today}
+              weekStartsOn={weekStartsOn}
+              weeks={8}
+              cell={6}
+              gap={2}
+            />
+          </div>
+        ) : null}
         <HabitActionsMenu
           habit={habit}
           onEdit={onEdit}
