@@ -168,7 +168,7 @@ export default function TodayPage() {
               settings.weekStartsOn,
             );
             return (
-              <li key={entry.habit.id}>
+              <li key={entry.habit.id} className="motion-safe:animate-row-in">
                 <TodayHabitCard
                   entry={entry}
                   streak={streak}

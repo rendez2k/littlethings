@@ -105,7 +105,7 @@ export default function HabitsPage() {
               </h2>
               <ul className="space-y-3">
                 {group.habits.map((habit, i) => (
-                  <li key={habit.id}>
+                  <li key={habit.id} className="motion-safe:animate-row-in">
                     <HabitListRow
                       habit={habit}
                       onOpen={open}
@@ -130,7 +130,7 @@ export default function HabitsPage() {
               </h2>
               <ul className="space-y-3">
                 {visibleArchived.map((habit) => (
-                  <li key={habit.id}>
+                  <li key={habit.id} className="motion-safe:animate-row-in">
                     <HabitListRow habit={habit} onOpen={open} onEdit={openEdit} />
                   </li>
                 ))}
