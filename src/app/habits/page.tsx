@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ListTodo, Plus, Search } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
@@ -9,16 +9,38 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { HabitListRow } from '@/components/habits/habit-list-row';
 import { useHabitEditor } from '@/components/habits/habit-editor-provider';
-import { getHabitService, useActiveHabits, useArchivedHabits } from '@/features/habits/hooks';
+import {
+  getHabitService,
+  useActiveHabits,
+  useAllCompletions,
+  useArchivedHabits,
+} from '@/features/habits/hooks';
+import { useAppSettings } from '@/features/settings/hooks';
 import { groupHabits } from '@/features/habits/categories';
 import type { Habit } from '@/features/habits/schemas';
+import type { Completion } from '@/features/completions/schemas';
+import { todayKey, type DateKey } from '@/lib/dates';
 
 export default function HabitsPage() {
   const active = useActiveHabits();
   const archived = useArchivedHabits();
+  const allCompletions = useAllCompletions();
+  const settings = useAppSettings();
   const { openCreate, openEdit } = useHabitEditor();
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [today, setToday] = useState<DateKey | null>(null);
+  useEffect(() => setToday(todayKey(new Date())), []);
+
+  const completionsByHabit = useMemo(() => {
+    const grouped = new Map<string, Completion[]>();
+    for (const c of allCompletions ?? []) {
+      const list = grouped.get(c.habitId) ?? [];
+      list.push(c);
+      grouped.set(c.habitId, list);
+    }
+    return grouped;
+  }, [allCompletions]);
 
   const open = (habit: Habit) => router.push(`/habits/${habit.id}`);
 
@@ -110,6 +132,9 @@ export default function HabitsPage() {
                       habit={habit}
                       onOpen={open}
                       onEdit={openEdit}
+                      completions={completionsByHabit.get(habit.id)}
+                      today={today}
+                      weekStartsOn={settings.weekStartsOn}
                       onMoveUp={!query && i > 0 ? () => moveInGroup(group.habits, i, -1) : undefined}
                       onMoveDown={
                         !query && i < group.habits.length - 1
