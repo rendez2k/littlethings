@@ -48,7 +48,14 @@ Implementation per platform:
 ## Status
 
 - [x] Web contract, snapshot builder, bridge, sync hook (+ unit tests)
-- [ ] `LKWidget` native plugin (shell)
-- [ ] iOS Widget Extension target + App Group
-- [ ] Signing: provisioning for the extension bundle id (LaunchKit fastlane lanes)
+- [x] `LKWidget` native plugin (LaunchKit shell)
+- [x] iOS Widget Extension target + App Group (injected at build time)
+- [x] Signing: profiles for the extension bundle id (LaunchKit fastlane lanes)
+- [ ] **Verify on a real build** — enable the `widgets` build option, do the
+      one-time App Group setup, confirm it compiles, signs and renders on device
 - [ ] Android Glance widget
+
+The native iOS side lives in the LaunchKit shell repo (see its
+`docs/ios-widget.md`). It's off by default; a build opts in via the `widgets`
+option. Everything mechanical is verified; Swift compilation + signing only
+confirm on a macOS build.
