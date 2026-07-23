@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 import { Check, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAppearance } from '@/components/theme/appearance-provider';
@@ -10,7 +10,7 @@ import type { DayStatus } from '@/features/completions/logic';
 import type { Completion } from '@/features/completions/schemas';
 import type { Habit } from '@/features/habits/schemas';
 import { getCompletionService } from '@/features/habits/hooks';
-import { completionHaptic } from '@/lib/haptics';
+import { celebrateCompletion } from '@/lib/celebrate';
 import type { DateKey } from '@/lib/dates';
 
 interface Props {
@@ -36,8 +36,8 @@ export function CompletionControl({ habit, completion, status, date, disabled }:
         onColor={accent.on}
         reducedMotion={appearance.reducedMotion}
         label={complete ? `Mark ${habit.name} not done` : `Mark ${habit.name} done`}
-        onClick={() => {
-          if (!complete) completionHaptic();
+        onClick={(e) => {
+          if (!complete) celebrateCompletion(e.currentTarget, appearance.reducedMotion);
           service.toggle(habit.id, date);
         }}
       />
@@ -77,9 +77,11 @@ export function CompletionControl({ habit, completion, status, date, disabled }:
         type="button"
         aria-label={`Increase ${habit.name}`}
         disabled={disabled}
-        onClick={() => {
-          // Buzz only when this tap reaches the goal, not on every increment.
-          if (value < goal && value + step >= goal) completionHaptic();
+        onClick={(e) => {
+          // Celebrate only when this tap reaches the goal, not every increment.
+          if (value < goal && value + step >= goal) {
+            celebrateCompletion(e.currentTarget, appearance.reducedMotion);
+          }
           service.increment(habit.id, date, step);
         }}
         className="flex h-8 w-8 items-center justify-center rounded-full disabled:opacity-30"
@@ -106,7 +108,7 @@ function BooleanCheck({
   onColor: string;
   reducedMotion: boolean;
   label: string;
-  onClick: () => void;
+  onClick: (e: MouseEvent<HTMLButtonElement>) => void;
 }) {
   const [pulse, setPulse] = useState(false);
   return (
@@ -115,12 +117,12 @@ function BooleanCheck({
       aria-pressed={complete}
       aria-label={label}
       disabled={disabled}
-      onClick={() => {
+      onClick={(e) => {
         if (!complete && !reducedMotion) {
           setPulse(true);
           window.setTimeout(() => setPulse(false), 260);
         }
-        onClick();
+        onClick(e);
       }}
       className={cn(
         'flex h-11 w-11 items-center justify-center rounded-full border-2 transition-transform active:scale-90 disabled:opacity-40',

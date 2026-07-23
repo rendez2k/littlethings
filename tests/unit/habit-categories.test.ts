@@ -29,17 +29,23 @@ describe('habitCategory', () => {
     expect(habitCategory(meditate)).toBe('daily');
   });
 
-  it('buckets every non-daily cadence as "weekly"', () => {
+  it('buckets weekly rhythms (weekdays, times per week) as "weekly"', () => {
     expect(habitCategory(makeScheduledHabit({ type: 'weekdays', weekdays: [1, 3, 5] }))).toBe(
       'weekly',
     );
     expect(habitCategory(makeScheduledHabit({ type: 'times_per_week', timesPerWeek: 3 }))).toBe(
       'weekly',
     );
+  });
+
+  it('gives every-N-days, monthly and one-off their own buckets', () => {
     expect(habitCategory(makeScheduledHabit({ type: 'every_n_days', intervalDays: 2 }))).toBe(
-      'weekly',
+      'interval',
     );
-    expect(habitCategory(makeScheduledHabit({ type: 'once' }))).toBe('weekly');
+    expect(habitCategory(makeScheduledHabit({ type: 'times_per_month', timesPerMonth: 5 }))).toBe(
+      'monthly',
+    );
+    expect(habitCategory(makeScheduledHabit({ type: 'once' }))).toBe('oneOff');
   });
 });
 
