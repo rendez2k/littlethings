@@ -14,6 +14,7 @@ import { useHabitEditor } from '@/components/habits/habit-editor-provider';
 import { useActiveHabits, useAllCompletions, useCompletionsForDate } from '@/features/habits/hooks';
 import { useAppSettings } from '@/features/settings/hooks';
 import { buildDayView } from '@/features/completions/day-view';
+import { useTodayWidgetSync } from '@/features/widget/use-widget-sync';
 import { computeStreak, type StreakResult } from '@/features/streaks/streak';
 import type { Completion } from '@/features/completions/schemas';
 import { encouragement } from '@/features/encouragement/messages';
@@ -64,6 +65,9 @@ export default function TodayPage() {
     }
     return ids;
   }, [allCompletions]);
+
+  // Mirror today's progress to the native home-screen widget (no-op on web).
+  useTodayWidgetSync(habits, completionsForDate, selectedDate, today, everCompletedHabitIds);
 
   if (habits === undefined || today === null || selectedDate === null) {
     return <PageHeader title="Today" subtitle=" " />;
