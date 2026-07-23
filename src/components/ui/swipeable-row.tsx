@@ -40,6 +40,13 @@ export function SwipeableRow({
   const axis = useRef<'none' | 'x' | 'y'>('none');
   const moved = useRef(false);
 
+  // React routes events from portalled descendants (e.g. an actions menu or a
+  // dialog rendered by `children`) through the React tree, so they reach these
+  // handlers even though they aren't physically inside the row. Ignore those —
+  // only touches actually on the row should swipe it.
+  const isInside = (e: { currentTarget: HTMLElement; target: EventTarget | null }) =>
+    e.currentTarget.contains(e.target as Node | null);
+
   const clamp = (dx: number) => {
     const max = leftAction ? ACTION_WIDTH : 0;
     const min = rightAction ? -ACTION_WIDTH : 0;
@@ -50,10 +57,12 @@ export function SwipeableRow({
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (!isInside(e)) return;
+    // Only record the origin — do NOT set state here, so a plain tap never
+    // re-renders (which would churn interactive children mid-tap).
     start.current = { x: e.clientX, y: e.clientY, base: offset };
     axis.current = 'none';
     moved.current = false;
-    setDragging(true);
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -63,7 +72,10 @@ export function SwipeableRow({
     if (axis.current === 'none') {
       if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       axis.current = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      if (axis.current === 'x') e.currentTarget.setPointerCapture(e.pointerId);
+      if (axis.current === 'x') {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        setDragging(true); // now it's a real swipe — safe to re-render
+      }
     }
     if (axis.current !== 'x') return; // vertical → let the list scroll
     moved.current = true;
@@ -72,6 +84,7 @@ export function SwipeableRow({
 
   const endDrag = (e: PointerEvent<HTMLDivElement>) => {
     if (!start.current) return;
+    const wasSwipe = axis.current === 'x';
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
@@ -79,6 +92,7 @@ export function SwipeableRow({
     }
     start.current = null;
     axis.current = 'none';
+    if (!wasSwipe) return; // a tap — nothing to settle
     setDragging(false);
     setOffset((o) => {
       if (o > OPEN_AT && leftAction) return ACTION_WIDTH;
@@ -93,7 +107,9 @@ export function SwipeableRow({
   };
 
   // Swallow the tap that ends a swipe, or a tap while open (which just closes).
-  const onClickCapture = (e: MouseEvent) => {
+  // Never touch clicks from portalled children (menus, dialogs).
+  const onClickCapture = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isInside(e)) return;
     if (moved.current || offset !== 0) {
       e.preventDefault();
       e.stopPropagation();
