@@ -1,6 +1,6 @@
 'use client';
 
-import { Flame, StickyNote, Trash2 } from 'lucide-react';
+import { Flame, Pencil, StickyNote, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAppearance } from '@/components/theme/appearance-provider';
 import { getHabitIcon } from '@/features/habits/icons';
@@ -13,6 +13,7 @@ import type { DateKey } from '@/lib/dates';
 import { CompletionControl } from '@/components/habits/completion-control';
 import { SwipeableRow, type SwipeAction } from '@/components/ui/swipeable-row';
 import { useDeleteHabit } from '@/components/habits/use-delete-habit';
+import { useHabitEditor } from '@/components/habits/habit-editor-provider';
 
 interface Props {
   entry: DayEntry;
@@ -38,7 +39,14 @@ export function TodayHabitCard({ entry, streak, date, today, showStreak = true, 
   const isFutureDay = date > today;
   const done = status === 'complete' || status === 'skipped';
   const requestDelete = useDeleteHabit();
+  const { openEdit } = useHabitEditor();
 
+  const editAction: SwipeAction = {
+    icon: <Pencil className="h-5 w-5" aria-hidden="true" />,
+    label: 'Edit',
+    tone: 'edit',
+    onAction: () => openEdit(habit),
+  };
   const deleteAction: SwipeAction = {
     icon: <Trash2 className="h-5 w-5" aria-hidden="true" />,
     label: 'Delete',
@@ -47,7 +55,11 @@ export function TodayHabitCard({ entry, streak, date, today, showStreak = true, 
   };
 
   return (
-    <SwipeableRow rightAction={deleteAction} reducedMotion={appearance.reducedMotion}>
+    <SwipeableRow
+      leftAction={editAction}
+      rightAction={deleteAction}
+      reducedMotion={appearance.reducedMotion}
+    >
       <div
         className={cn(
           'flex items-center gap-3 rounded-card border border-border p-3 transition',

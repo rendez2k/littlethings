@@ -11,6 +11,101 @@ import {
   isPushSupported,
 } from '@/lib/push/client';
 import { syncReminders } from '@/features/reminders/sync';
+import {
+  cancelAllLocalNotifications,
+  isLocalNotificationsAvailable,
+  localNotificationPermission,
+  requestLocalNotificationPermission,
+} from '@/lib/native-notifications';
+import {
+  localRemindersEnabled,
+  setLocalRemindersEnabled,
+  syncLocalNotifications,
+} from '@/features/reminders/local-sync';
+
+export function ReminderSettings() {
+  // Detect the native Local Notifications plugin after mount (avoids a
+  // hydration mismatch — it's false during SSR / the first client render).
+  const [native, setNative] = useState(false);
+  useEffect(() => {
+    setNative(isLocalNotificationsAvailable());
+  }, []);
+
+  return native ? <NativeReminders /> : <WebPushReminders />;
+}
+
+/* --------------------------- Native (Capacitor) --------------------------- */
+
+function NativeReminders() {
+  const [enabled, setEnabled] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    localNotificationPermission()
+      .then((perm) => setEnabled(localRemindersEnabled() && perm === 'granted'))
+      .catch(() => {});
+  }, []);
+
+  const turnOn = async () => {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const granted = await requestLocalNotificationPermission();
+      if (!granted) {
+        setMessage('Notifications are blocked. Allow them for Little Things in your device settings.');
+        return;
+      }
+      setLocalRemindersEnabled(true);
+      await syncLocalNotifications();
+      setEnabled(true);
+      setMessage('Reminders are on. Set a reminder time on any habit.');
+    } catch {
+      setMessage('Something went wrong. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const turnOff = async () => {
+    setBusy(true);
+    try {
+      setLocalRemindersEnabled(false);
+      await cancelAllLocalNotifications();
+      setEnabled(false);
+      setMessage('Reminders turned off.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <SettingsSection title="Reminders">
+      <SettingsRow
+        label={enabled ? 'Reminders on' : 'Turn on reminders'}
+        description={
+          enabled
+            ? 'Scheduled on this device — you’ll be nudged at each habit’s reminder time, even offline.'
+            : 'A gentle notification at each habit’s reminder time, scheduled right on your device.'
+        }
+        control={
+          enabled ? (
+            <Button size="sm" variant="secondary" disabled={busy} onClick={turnOff}>
+              Turn off
+            </Button>
+          ) : (
+            <Button size="sm" disabled={busy} onClick={turnOn}>
+              {busy ? 'Enabling…' : 'Enable'}
+            </Button>
+          )
+        }
+      />
+      {message ? <SettingsRow label={message} /> : null}
+    </SettingsSection>
+  );
+}
+
+/* ------------------------------- Web Push -------------------------------- */
 
 const REASON_MESSAGE: Record<string, string> = {
   denied: 'Notifications are blocked. Enable them for this site in your browser settings.',
@@ -24,7 +119,7 @@ const REASON_MESSAGE: Record<string, string> = {
   unexpected: 'Something went wrong. Please try again.',
 };
 
-export function ReminderSettings() {
+function WebPushReminders() {
   const [supported, setSupported] = useState(true);
   const [enabled, setEnabled] = useState(false);
   const [busy, setBusy] = useState(false);

@@ -1,7 +1,32 @@
-# Reminders / Web Push — setup
+# Reminders — setup
 
 Reminders send a real notification at each habit's set time, even when the app
-is closed. This needs a few one-time steps because a local-first app can't send
+is closed. There are two delivery paths, and the app picks automatically:
+
+- **Native app (Capacitor) — recommended.** Reminders are scheduled **on the
+  device** via the Capacitor Local Notifications plugin. No server, works
+  offline, works on Android and iOS. Just install the plugin in your Capacitor
+  host and rebuild:
+
+  ```bash
+  npm i @capacitor/local-notifications && npx cap sync
+  ```
+
+  Then in the app: Settings → Reminders → **Enable**, allow notifications, and
+  set a reminder time on any habit. That's it — the rest of this document
+  (Supabase / Web Push) is **not needed** for the native app.
+
+- **Browser / installed PWA — Web Push.** In a normal browser or an installed
+  PWA (Android Chrome, or an iOS Home Screen app), there's no native scheduler,
+  so reminders go through Web Push, which needs the Supabase setup below. (Note:
+  Web Push is **not** available inside the Android WebView, which is why the
+  native Local Notifications path above exists.)
+
+---
+
+## Web Push setup (browser / PWA only)
+
+This needs a few one-time steps because a local-first app can't send
 notifications by itself — your Supabase project does the sending.
 
 **What leaves the device:** only the reminder time, the habit name (used as the
