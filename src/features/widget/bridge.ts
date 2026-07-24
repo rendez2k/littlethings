@@ -13,9 +13,44 @@ import type { WidgetSnapshot } from './contract';
 interface LKWidgetPlugin {
   /** Persist the snapshot to shared storage and refresh the widget timelines. */
   setSnapshot(options: { json: string }): Promise<void>;
+  /**
+   * Return and clear any completion toggles the user made from the widget while
+   * the app was closed/backgrounded. Each is the *absolute* desired state, JSON
+   * encoded, so applying it is idempotent.
+   */
+  drainPending(): Promise<{ pending: string }>;
 }
 
 const LKWidget = registerPlugin<LKWidgetPlugin>('LKWidget');
+
+/** A completion toggle the user made from the home-screen widget. */
+export interface PendingWidgetToggle {
+  habitId: string;
+  /** yyyy-mm-dd the toggle applies to. */
+  date: string;
+  /** Absolute target state: true → mark satisfied, false → clear. */
+  done: boolean;
+}
+
+function isPendingToggle(value: unknown): value is PendingWidgetToggle {
+  if (!value || typeof value !== 'object') return false;
+  const t = value as Record<string, unknown>;
+  return typeof t.habitId === 'string' && typeof t.date === 'string' && typeof t.done === 'boolean';
+}
+
+/**
+ * Pull the queue of widget-initiated toggles from the native plugin, clearing it
+ * on the native side. Safe on the web / plugin-less builds — resolves to `[]`.
+ */
+export async function drainPendingToggles(): Promise<PendingWidgetToggle[]> {
+  try {
+    const { pending } = await LKWidget.drainPending();
+    const parsed: unknown = JSON.parse(pending || '[]');
+    return Array.isArray(parsed) ? parsed.filter(isPendingToggle) : [];
+  } catch {
+    return [];
+  }
+}
 
 /** Whether the native LKWidget plugin is registered in this build. */
 export function widgetsAvailable(): boolean {
