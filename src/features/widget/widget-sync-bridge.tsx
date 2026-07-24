@@ -36,6 +36,9 @@ export function WidgetSyncBridge() {
       try {
         await applyPendingWidgetToggles();
         await pushTodayWidgetSnapshot();
+      } catch {
+        // Widget reconciliation is best-effort — never surface a rejection to
+        // the app (an unhandled rejection here must not take down the UI).
       } finally {
         running = false;
       }
