@@ -15,23 +15,46 @@ Today screen ──useTodayWidgetSync──▶ pushWidgetSnapshot()
                                          │  (LKWidget Capacitor plugin)
                                          ▼
                             App Group / shared storage  ──read──▶ WidgetKit / Glance
-                                         ▲
-                       plugin also asks the OS to refresh timelines
+                                         ▲                              │ tap toggles a habit
+                       plugin also asks the OS to refresh timelines     ▼
+   applyPendingWidgetToggles() ◀──drainPending()──  queued toggles (App Group)
+      (on launch + every foreground; re-pushes the corrected snapshot)
 ```
 
 - **`src/features/widget/contract.ts`** — the `WidgetSnapshot` JSON shape. The
   single source of truth; the native decoder must mirror it. Bump `schema` on any
   breaking change.
 - **`snapshot.ts`** — pure `buildWidgetSnapshot(dayView, date, now)`.
-- **`bridge.ts`** — `pushWidgetSnapshot()`; calls the `LKWidget` plugin, no-ops in
-  a plain browser or a shell without the plugin (so it's safe to ship now).
+- **`bridge.ts`** — `pushWidgetSnapshot()` and `drainPendingToggles()`; call the
+  `LKWidget` plugin, no-op in a plain browser or a shell without the plugin (so
+  it's safe to ship now).
 - **`use-widget-sync.ts`** — pushes when today's content changes; only while the
   app is showing today.
+- **`pending-toggles.ts`** — `applyPendingWidgetToggles()` writes widget-initiated
+  toggles to the data layer; `pushTodayWidgetSnapshot()` re-pushes afterwards.
+- **`widget-sync-bridge.tsx`** — mounted at the app root; drains + reconciles on
+  launch and on every foreground.
+
+## Two-way toggles
+
+The widget is interactive: tapping a habit toggles today's completion. Because the
+widget can't reach IndexedDB, the native side records the tap and the app applies
+it later.
+
+- Each queued toggle is `{ habitId, date, done }` where **`done` is the absolute
+  desired state**, not a flip — so applying it is idempotent and re-applying a
+  toggle that already landed is a no-op.
+- `done: true` → mark today satisfied (`completion.complete`); `done: false` →
+  clear today's completion (`completion.clear`).
+- The app drains the queue on launch and every foreground, applies each toggle,
+  then re-pushes today's snapshot so the widget self-corrects.
 
 ## The `LKWidget` Capacitor plugin (native, to build in the shell)
 
 ```ts
 LKWidget.setSnapshot({ json: string }): Promise<void>
+// Return and clear the queued toggles as a JSON array of { habitId, date, done }.
+LKWidget.drainPending(): Promise<{ pending: string }>
 ```
 
 Implementation per platform:
