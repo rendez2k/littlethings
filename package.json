@@ -1,6 +1,6 @@
 {
   "name": "little-things",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "private": true,
   "description": "Little Things — a calm, local-first habit tracker PWA.",
   "scripts": {
