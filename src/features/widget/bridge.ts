@@ -7,6 +7,7 @@
  * there's nowhere to write to.
  */
 
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import type { WidgetSnapshot } from './contract';
 
 interface LKWidgetPlugin {
@@ -14,25 +15,18 @@ interface LKWidgetPlugin {
   setSnapshot(options: { json: string }): Promise<void>;
 }
 
-function getPlugin(): LKWidgetPlugin | null {
-  const cap = (globalThis as unknown as {
-    Capacitor?: { Plugins?: Record<string, unknown> };
-  }).Capacitor;
-  const plugin = cap?.Plugins?.LKWidget as LKWidgetPlugin | undefined;
-  return plugin && typeof plugin.setSnapshot === 'function' ? plugin : null;
-}
+const LKWidget = registerPlugin<LKWidgetPlugin>('LKWidget');
 
 /** Whether a native widget bridge is present (i.e. running inside the shell). */
 export function widgetsAvailable(): boolean {
-  return getPlugin() !== null;
+  return Capacitor.isPluginAvailable('LKWidget');
 }
 
 /** Push a snapshot to the native widget. Non-fatal — never throws to callers. */
 export async function pushWidgetSnapshot(snapshot: WidgetSnapshot): Promise<void> {
-  const plugin = getPlugin();
-  if (!plugin) return;
+  if (!Capacitor.isPluginAvailable('LKWidget')) return;
   try {
-    await plugin.setSnapshot({ json: JSON.stringify(snapshot) });
+    await LKWidget.setSnapshot({ json: JSON.stringify(snapshot) });
   } catch {
     // A widget refresh failing must never disrupt the app.
   }
