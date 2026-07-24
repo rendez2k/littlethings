@@ -7,7 +7,6 @@ import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { HabitEditorProvider } from '@/components/habits/habit-editor-provider';
 import { AppShell } from '@/components/layout/app-shell';
 import { ServiceWorkerRegistrar } from '@/components/pwa/service-worker-registrar';
-import { WidgetSyncBridge } from '@/features/widget/widget-sync-bridge';
 
 const APP_NAME = 'Little Things';
 const APP_DESCRIPTION =
@@ -69,7 +68,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </AuthProvider>
         </AppearanceProvider>
         <ServiceWorkerRegistrar />
-        <WidgetSyncBridge />
       </body>
     </html>
   );
