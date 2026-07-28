@@ -46,21 +46,6 @@ export function encouragement(ctx: EncouragementContext): string {
   return pick(MIDWAY, ctx.seed, name);
 }
 
-const RUNNING_UNIT: Record<'day' | 'week' | 'month', string> = {
-  day: 'days',
-  week: 'weeks',
-  month: 'months',
-};
-
-/**
- * A gentle acknowledgement for a habit completed today. Streak-aware but never
- * a reward — it names the run when there is one, otherwise just a quiet nod.
- */
-export function completionNote(streakCurrent: number, streakUnit: 'day' | 'week' | 'month'): string {
-  if (streakCurrent >= 2) return `${streakCurrent} ${RUNNING_UNIT[streakUnit]} running — lovely.`;
-  return 'Done for today.';
-}
-
 /** A simple time-of-day greeting, optionally personalised. */
 export function greeting(name: string | undefined, hour: number): string {
   const part = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';

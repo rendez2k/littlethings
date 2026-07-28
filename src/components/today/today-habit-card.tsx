@@ -6,7 +6,6 @@ import { useAppearance } from '@/components/theme/appearance-provider';
 import { getHabitIcon } from '@/features/habits/icons';
 import { getHabitAccent } from '@/features/habits/colors';
 import { scheduleLabel, targetLabel } from '@/features/habits/labels';
-import { completionNote } from '@/features/encouragement/messages';
 import type { DayEntry } from '@/features/completions/day-view';
 import type { StreakResult } from '@/features/streaks/streak';
 import type { Habit } from '@/features/habits/schemas';
@@ -39,9 +38,9 @@ export function TodayHabitCard({ entry, streak, date, today, showStreak = true, 
   const target = targetLabel(habit.target);
   const isFutureDay = date > today;
   const done = status === 'complete' || status === 'skipped';
-  // A quiet, streak-aware acknowledgement replaces the schedule line once a
-  // habit is genuinely done today (not for past days or skips).
-  const doneNote = status === 'complete' && date === today ? completionNote(streak.current, streak.unit) : null;
+  // Once a habit is genuinely done today, the schedule line becomes a quiet
+  // acknowledgement (the streak indicator stays put beside it).
+  const showDone = status === 'complete' && date === today;
   const requestDelete = useDeleteHabit();
   const { openEdit } = useHabitEditor();
 
@@ -91,29 +90,34 @@ export function TodayHabitCard({ entry, streak, date, today, showStreak = true, 
                 <StickyNote className="h-3.5 w-3.5 shrink-0 text-muted" aria-label="Has a note" />
               ) : null}
             </span>
-            {doneNote ? (
-              <span className="mt-0.5 flex items-center text-sm font-medium text-success">
-                <span className="truncate">{doneNote}</span>
+            <span
+              className={cn(
+                'mt-0.5 flex items-center gap-2 text-sm',
+                showDone ? 'font-medium text-success' : 'text-muted',
+              )}
+            >
+              <span className="truncate">
+                {showDone ? (
+                  'Done for today.'
+                ) : (
+                  <>
+                    {scheduleLabel(habit.schedule)}
+                    {target ? ` · ${target}` : ''}
+                  </>
+                )}
               </span>
-            ) : (
-              <span className="mt-0.5 flex items-center gap-2 text-sm text-muted">
-                <span className="truncate">
-                  {scheduleLabel(habit.schedule)}
-                  {target ? ` · ${target}` : ''}
-                </span>
-                {showStreak && streak.current > 0 ? (
-                  <span
-                    className="inline-flex shrink-0 items-center gap-0.5 font-medium"
-                    style={{ color: accent }}
-                  >
-                    <Flame className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span aria-label={`${streak.current} ${STREAK_UNIT_LABEL[streak.unit]} streak`}>
-                      {streak.current}
-                    </span>
+              {showStreak && streak.current > 0 ? (
+                <span
+                  className="inline-flex shrink-0 items-center gap-0.5 font-medium"
+                  style={{ color: accent }}
+                >
+                  <Flame className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span aria-label={`${streak.current} ${STREAK_UNIT_LABEL[streak.unit]} streak`}>
+                    {streak.current}
                   </span>
-                ) : null}
-              </span>
-            )}
+                </span>
+              ) : null}
+            </span>
           </span>
         </button>
 

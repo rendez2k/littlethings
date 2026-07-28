@@ -87,16 +87,9 @@ export default function TodayPage() {
   const isToday = selectedDate === today;
   const doneCount = view.summary.completed + view.summary.skipped;
   const remaining = view.summary.total - doneCount;
-  // Name the first couple of unfinished habits so the sub-line is a nudge, not a stat.
-  const remainingNames = view.entries
-    .filter((entry) => entry.status !== 'complete' && entry.status !== 'skipped')
-    .map((entry) => entry.habit.name);
-  const toGoLine =
-    remaining > 0
-      ? remaining <= 2 && remainingNames.length > 0
-        ? `${remaining} to go · ${remainingNames.slice(0, 2).join(' & ')}`
-        : `${remaining} to go`
-      : dateLabel;
+  // A crisp remaining count under the encouragement line; the habits themselves
+  // are listed just below, so we don't repeat their names here.
+  const toGoLine = remaining > 0 ? `${remaining} to go` : dateLabel;
   const encourageLine = settings.showMotivationalMessages
     ? encouragement({
         name: settings.displayName,

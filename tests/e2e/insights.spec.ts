@@ -6,7 +6,7 @@ test('insights show metrics and switch range', async ({ page }) => {
   await page.getByLabel('Name').fill('Meditate');
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'Mark Meditate done' }).click();
-  await expect(page.getByText('1 of 1 complete')).toBeVisible();
+  await expect(page.getByRole('img', { name: '1 of 1 complete' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Insights' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Insights' })).toBeVisible();

@@ -20,7 +20,7 @@ test('main screens have no serious accessibility violations', async ({ page }) =
   await page.getByLabel('Name').fill('Meditate');
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'Mark Meditate done' }).click();
-  await expect(page.getByText('1 of 1 complete')).toBeVisible();
+  await expect(page.getByRole('img', { name: '1 of 1 complete' })).toBeVisible();
 
   expect(await scan(page), 'Today').toEqual([]);
 
