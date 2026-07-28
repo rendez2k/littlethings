@@ -7,6 +7,7 @@ import { SettingsRow, SettingsSection } from './settings-section';
 import { useActiveHabits, useAllCompletions, useCompletionsForDate } from '@/features/habits/hooks';
 import { buildDayView } from '@/features/completions/day-view';
 import { buildWidgetSnapshot } from '@/features/widget/snapshot';
+import { currentWidgetAccent } from '@/features/widget/accent';
 import { pushWidgetSnapshotResult } from '@/features/widget/bridge';
 import { todayKey } from '@/lib/dates';
 
@@ -47,7 +48,7 @@ export function WidgetDiagnostics() {
       const ever = new Set<string>();
       for (const c of allCompletions ?? []) if (!c.deletedAt) ever.add(c.habitId);
       const view = buildDayView(habits ?? [], completionsForDate ?? [], today, today, ever);
-      const snapshot = buildWidgetSnapshot(view, today, new Date().toISOString());
+      const snapshot = buildWidgetSnapshot(view, today, new Date().toISOString(), currentWidgetAccent());
       const result = await pushWidgetSnapshotResult(snapshot);
       setMessage(OUTCOME[result] ?? 'Done.');
     } finally {

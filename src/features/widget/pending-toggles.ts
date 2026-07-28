@@ -15,6 +15,7 @@ import { getCompletionService } from '@/features/habits/hooks';
 import { buildDayView } from '@/features/completions/day-view';
 import { todayKey } from '@/lib/dates';
 import { buildWidgetSnapshot } from './snapshot';
+import { currentWidgetAccent } from './accent';
 import { drainPendingToggles, pushWidgetSnapshot } from './bridge';
 
 /**
@@ -57,5 +58,7 @@ export async function pushTodayWidgetSnapshot(): Promise<void> {
   for (const c of all) everCompleted.add(c.habitId);
 
   const view = buildDayView(habits, forDate, today, today, everCompleted);
-  await pushWidgetSnapshot(buildWidgetSnapshot(view, today, new Date().toISOString()));
+  await pushWidgetSnapshot(
+    buildWidgetSnapshot(view, today, new Date().toISOString(), currentWidgetAccent()),
+  );
 }
