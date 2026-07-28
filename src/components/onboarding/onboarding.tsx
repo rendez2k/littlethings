@@ -13,17 +13,17 @@ const ONBOARDED_KEY = 'little-things.onboarded.v1';
 const POINTS = [
   {
     icon: CloudOff,
-    title: 'Private & offline',
+    title: 'Private & offline 🔒',
     text: 'Everything stays on your device. No account, no tracking.',
   },
   {
     icon: Wand2,
-    title: 'Simple to start',
+    title: 'Simple to start 🌱',
     text: 'Add your first habit in seconds, from a template or your own.',
   },
   {
     icon: HeartHandshake,
-    title: 'Gentle by design',
+    title: 'Gentle by design 🤍',
     text: 'Streaks encourage you — a missed day is never a failure.',
   },
 ];

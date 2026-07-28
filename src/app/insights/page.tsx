@@ -161,13 +161,13 @@ export default function InsightsPage() {
           </div>
 
           <Card>
-            <h2 className="mb-1 text-sm font-semibold text-text">Completion trend</h2>
+            <h2 className="mb-1 text-sm font-semibold text-text">Completion trend 📈</h2>
             <p className="mb-3 text-xs text-muted">{trendSummary}</p>
             <TrendChart points={insights.trend} summary={trendSummary} />
           </Card>
 
           <Card>
-            <h2 className="mb-3 text-sm font-semibold text-text">Habit performance</h2>
+            <h2 className="mb-3 text-sm font-semibold text-text">Habit performance 🏆</h2>
             {insights.habitPerformance.length ? (
               <BarList items={insights.habitPerformance} />
             ) : (
@@ -176,7 +176,7 @@ export default function InsightsPage() {
           </Card>
 
           <Card>
-            <h2 className="mb-1 text-sm font-semibold text-text">Most consistent day</h2>
+            <h2 className="mb-1 text-sm font-semibold text-text">Most consistent day 📅</h2>
             <p className="mb-3 text-xs text-muted">{consistentSummary}</p>
             <WeekdayBars weekdays={insights.weekdays} mostConsistent={insights.mostConsistentDay} />
           </Card>
@@ -191,7 +191,7 @@ export default function InsightsPage() {
       {today ? (
         <section className="mt-6">
           <div className="mb-2 flex items-center justify-between gap-3 px-1">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">History</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">History 🗓️</h2>
             <div className="w-32 shrink-0">
               <SegmentedControl
                 ariaLabel="History range"

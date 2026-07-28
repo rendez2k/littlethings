@@ -39,13 +39,13 @@ export default function GoalsPage() {
 
   return (
     <>
-      <PageHeader title="Goals" subtitle="Your bucket list" action={addButton} />
+      <PageHeader title="Goals" subtitle="Your bucket list 🪣" action={addButton} />
 
       {goals === undefined ? null : goals.length === 0 ? (
         <PlaceholderPanel
           icon={Target}
-          title="Dream a little"
-          description="Add the bigger things you want to do — a trip, a skill, a project. No schedule, just a list to work towards."
+          title="Dream a little ✨"
+          description="Add the bigger things you want to do — a trip ✈️, a skill 🎸, a project 🛠️. No schedule, just a list to work towards."
           action={
             <Button onClick={openNew}>
               <Plus aria-hidden="true" className="h-4 w-4" />
@@ -68,7 +68,7 @@ export default function GoalsPage() {
           {doneGoals.length > 0 ? (
             <section>
               <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-                Done ({doneGoals.length})
+                Done ({doneGoals.length}) 🎉
               </h2>
               <ul className="space-y-3">
                 {doneGoals.map((goal) => (

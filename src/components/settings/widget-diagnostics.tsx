@@ -57,7 +57,7 @@ export function WidgetDiagnostics() {
   };
 
   return (
-    <SettingsSection title="Widget">
+    <SettingsSection title="Widget 📲">
       <SettingsRow
         label="Home-screen widget"
         description="Shows today’s progress on your home screen."

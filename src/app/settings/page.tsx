@@ -47,7 +47,7 @@ export default function SettingsPage() {
       <DataSettings />
       <AccountSettings />
 
-      <SettingsSection title="About">
+      <SettingsSection title="About ℹ️">
         <SettingsRow
           label="Version"
           control={<span className="text-sm text-muted">{APP_VERSION}</span>}
