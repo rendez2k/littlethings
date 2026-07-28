@@ -18,6 +18,7 @@ import type { Habit } from '@/features/habits/schemas';
 import type { Completion } from '@/features/completions/schemas';
 import { buildDayView } from '@/features/completions/day-view';
 import { buildWidgetSnapshot } from './snapshot';
+import { currentWidgetAccent } from './accent';
 import { pushWidgetSnapshot } from './bridge';
 
 export function useTodayWidgetSync(
@@ -42,7 +43,7 @@ export function useTodayWidgetSync(
       today,
       everCompletedHabitIds,
     );
-    const snapshot = buildWidgetSnapshot(view, today, new Date().toISOString());
+    const snapshot = buildWidgetSnapshot(view, today, new Date().toISOString(), currentWidgetAccent());
 
     const { updatedAt: _ignored, ...content } = snapshot;
     const key = JSON.stringify(content);

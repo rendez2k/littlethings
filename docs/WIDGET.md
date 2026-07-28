@@ -49,6 +49,40 @@ it later.
 - The app drains the queue on launch and every foreground, applies each toggle,
   then re-pushes today's snapshot so the widget self-corrects.
 
+## Snapshot shape (schema 2)
+
+```jsonc
+{
+  "schema": 2,
+  "date": "2026-07-28",
+  "completed": 2, "total": 4, "ratio": 0.5,
+  "accent": { "light": "#6355c9", "dark": "#b7adfb" },   // selected palette — use for the ring
+  "habits": [
+    {
+      "id": "…", "name": "Water", "icon": "droplet", "color": "sky",
+      "colorHex": { "light": "#2a72c4", "dark": "#7cb8f2" }, // exact app colour, per appearance
+      "ratio": 0.75,        // progress toward today's target (1 = done)
+      "done": false, "partial": true
+    }
+  ],
+  "updatedAt": "…"
+}
+```
+
+Every colour is sent as **both** a light and a dark hex so the widget matches the
+app precisely and still adapts to its own appearance — the native side picks
+`light`/`dark` by its environment and never needs its own palette.
+
+### Card the shell should draw (calm, app-matching)
+
+- **Ring** from `ratio`, stroked in `accent` (light/dark), with `completed/total`
+  in the centre — the same treatment as the Today screen.
+- **Rows** (medium/large): a small marker per habit tinted with the habit's
+  `colorHex` — filled with a check when `done`, a `ratio`-filled arc/dot when
+  `partial`, hollow otherwise — then the `name` (truncate; overflow → "+N more").
+- **Empty** (`total == 0`): a soft "Nothing scheduled today 🌱".
+- Generous padding, system font, one accent, no borders — mirror the app's calm.
+
 ## The `LKWidget` Capacitor plugin (native, to build in the shell)
 
 ```ts
