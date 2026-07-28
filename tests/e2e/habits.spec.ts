@@ -47,13 +47,13 @@ test('complete and undo a habit, updating the summary and streak', async ({ page
   // Complete it.
   await page.getByRole('button', { name: 'Mark Meditate done' }).click();
   await expect(page.getByRole('button', { name: 'Mark Meditate not done' })).toBeVisible();
-  await expect(page.getByText('1 of 1 complete')).toBeVisible();
+  await expect(page.getByRole('img', { name: '1 of 1 complete' })).toBeVisible();
   await expect(page.getByLabel('1 day streak')).toBeVisible();
 
   // Undo it.
   await page.getByRole('button', { name: 'Mark Meditate not done' }).click();
   await expect(page.getByRole('button', { name: 'Mark Meditate done' })).toBeVisible();
-  await expect(page.getByText('0 of 1 complete')).toBeVisible();
+  await expect(page.getByRole('img', { name: '0 of 1 complete' })).toBeVisible();
 });
 
 test('open habit details and edit a day in the calendar', async ({ page }) => {

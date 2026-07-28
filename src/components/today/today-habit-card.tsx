@@ -38,6 +38,9 @@ export function TodayHabitCard({ entry, streak, date, today, showStreak = true, 
   const target = targetLabel(habit.target);
   const isFutureDay = date > today;
   const done = status === 'complete' || status === 'skipped';
+  // Once a habit is genuinely done today, the schedule line becomes a quiet
+  // acknowledgement (the streak indicator stays put beside it).
+  const showDone = status === 'complete' && date === today;
   const requestDelete = useDeleteHabit();
   const { openEdit } = useHabitEditor();
 
@@ -87,10 +90,21 @@ export function TodayHabitCard({ entry, streak, date, today, showStreak = true, 
                 <StickyNote className="h-3.5 w-3.5 shrink-0 text-muted" aria-label="Has a note" />
               ) : null}
             </span>
-            <span className="mt-0.5 flex items-center gap-2 text-sm text-muted">
+            <span
+              className={cn(
+                'mt-0.5 flex items-center gap-2 text-sm',
+                showDone ? 'font-medium text-success' : 'text-muted',
+              )}
+            >
               <span className="truncate">
-                {scheduleLabel(habit.schedule)}
-                {target ? ` · ${target}` : ''}
+                {showDone ? (
+                  'Done for today.'
+                ) : (
+                  <>
+                    {scheduleLabel(habit.schedule)}
+                    {target ? ` · ${target}` : ''}
+                  </>
+                )}
               </span>
               {showStreak && streak.current > 0 ? (
                 <span

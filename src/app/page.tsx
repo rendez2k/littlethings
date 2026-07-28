@@ -86,6 +86,10 @@ export default function TodayPage() {
   );
   const isToday = selectedDate === today;
   const doneCount = view.summary.completed + view.summary.skipped;
+  const remaining = view.summary.total - doneCount;
+  // A crisp remaining count under the encouragement line; the habits themselves
+  // are listed just below, so we don't repeat their names here.
+  const toGoLine = remaining > 0 ? `${remaining} to go` : dateLabel;
   const encourageLine = settings.showMotivationalMessages
     ? encouragement({
         name: settings.displayName,
@@ -120,17 +124,31 @@ export default function TodayPage() {
       />
 
       {view.summary.total > 0 ? (
-        <div className="mb-4 flex items-center justify-between rounded-card border border-border bg-surface px-4 py-3 shadow-card">
-          <div>
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-card border border-border bg-surface px-4 py-3 shadow-card">
+          <div className="min-w-0">
             <p className="text-sm font-semibold text-text">
-              {view.summary.completed + view.summary.skipped} of {view.summary.total} complete
+              {isToday ? encourageLine : `${doneCount} of ${view.summary.total} complete`}
             </p>
-            <p className="text-xs text-muted">{isToday ? encourageLine : dateLabel}</p>
+            <p className="mt-0.5 truncate text-xs text-muted">{isToday ? toGoLine : dateLabel}</p>
           </div>
           <ProgressRing
             ratio={view.summary.ratio}
-            label={`${view.summary.completed + view.summary.skipped} of ${view.summary.total} complete`}
-          />
+            size={64}
+            strokeWidth={6}
+            label={`${doneCount} of ${view.summary.total} complete`}
+            className="shrink-0"
+          >
+            <span className="flex flex-col items-center leading-none">
+              <span className="text-sm font-bold tabular-nums text-text">
+                {doneCount}
+                <span className="text-muted">/</span>
+                {view.summary.total}
+              </span>
+              <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted">
+                done
+              </span>
+            </span>
+          </ProgressRing>
         </div>
       ) : null}
 
