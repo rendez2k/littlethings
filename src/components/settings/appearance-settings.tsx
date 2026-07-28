@@ -19,7 +19,7 @@ export function AppearanceSettings() {
   const { appearance, resolvedTheme, setAppearance } = useAppearance();
 
   return (
-    <SettingsSection title="Appearance">
+    <SettingsSection title="Appearance 🎨">
       <SettingsRow label="Theme" description="Match your device or choose a look.">
         <SegmentedControl
           ariaLabel="Theme"

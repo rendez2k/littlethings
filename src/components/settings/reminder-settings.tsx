@@ -80,7 +80,7 @@ function NativeReminders() {
   };
 
   return (
-    <SettingsSection title="Reminders">
+    <SettingsSection title="Reminders 🔔">
       <SettingsRow
         label={enabled ? 'Reminders on' : 'Turn on reminders'}
         description={
@@ -134,7 +134,7 @@ function WebPushReminders() {
 
   if (!isPushConfigured) {
     return (
-      <SettingsSection title="Reminders">
+      <SettingsSection title="Reminders 🔔">
         <SettingsRow
           label="Reminders aren’t set up yet"
           description="Habit reminder times are saved, but sending notifications needs a one-time setup (see the app’s push guide)."
@@ -175,7 +175,7 @@ function WebPushReminders() {
   };
 
   return (
-    <SettingsSection title="Reminders">
+    <SettingsSection title="Reminders 🔔">
       <SettingsRow
         label={enabled ? 'Reminders on' : 'Turn on reminders'}
         description={

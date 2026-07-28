@@ -90,7 +90,7 @@ export function DataSettings() {
   const isDev = process.env.NODE_ENV === 'development';
 
   return (
-    <SettingsSection title="Data">
+    <SettingsSection title="Data 💾">
       {isDev ? (
         <SettingsRow
           label="Add demo data"

@@ -16,10 +16,20 @@ import {
   useArchivedHabits,
 } from '@/features/habits/hooks';
 import { useAppSettings } from '@/features/settings/hooks';
-import { groupHabits } from '@/features/habits/categories';
+import { groupHabits, type HabitCategory } from '@/features/habits/categories';
 import type { Habit } from '@/features/habits/schemas';
 import type { Completion } from '@/features/completions/schemas';
 import { todayKey, type DateKey } from '@/lib/dates';
+
+/** A gentle emoji per cadence group, to give the Habits list a little life. */
+const CATEGORY_EMOJI: Record<HabitCategory, string> = {
+  multipleDaily: '🔁',
+  daily: '☀️',
+  weekly: '📅',
+  interval: '🗓️',
+  monthly: '🌙',
+  oneOff: '⭐',
+};
 
 export default function HabitsPage() {
   const active = useActiveHabits();
@@ -123,7 +133,7 @@ export default function HabitsPage() {
           {groups.map((group) => (
             <section key={group.key}>
               <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-                {group.label}
+                {group.label} {CATEGORY_EMOJI[group.key]}
               </h2>
               <ul className="space-y-3">
                 {group.habits.map((habit, i) => (

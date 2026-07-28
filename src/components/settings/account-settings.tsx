@@ -24,7 +24,7 @@ export function AccountSettings() {
   const { configured, loading, user, username } = useAuth();
 
   return (
-    <SettingsSection title="Account">
+    <SettingsSection title="Account 👤">
       {!configured ? (
         <SettingsRow
           label="Using Little Things without an account"

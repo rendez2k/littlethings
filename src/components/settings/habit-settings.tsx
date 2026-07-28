@@ -12,7 +12,7 @@ export function HabitSettings() {
     getSettingsRepository().update(patch);
 
   return (
-    <SettingsSection title="Habits">
+    <SettingsSection title="Habits 🌱">
       <SettingsRow label="Your name" description="Used for gentle, personal encouragement.">
         <Input
           aria-label="Your name"
