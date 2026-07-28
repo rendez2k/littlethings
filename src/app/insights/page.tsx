@@ -41,6 +41,15 @@ const RANGE_NOUN: Record<InsightsRange, string> = {
   year: 'this year',
 };
 
+/** How far back the History heatmaps reach, in whole week columns. */
+type HistoryRange = '3m' | '6m' | '1y';
+const HISTORY_OPTIONS = [
+  { value: '3m' as const, label: '3m' },
+  { value: '6m' as const, label: '6m' },
+  { value: '1y' as const, label: '1y' },
+];
+const HISTORY_WEEKS: Record<HistoryRange, number> = { '3m': 13, '6m': 26, '1y': 52 };
+
 const DAY_NAME: Record<Weekday, string> = {
   0: 'Sunday',
   1: 'Monday',
@@ -60,6 +69,7 @@ export default function InsightsPage() {
   const completions = useAllCompletions();
   const settings = useAppSettings();
   const [range, setRange] = useState<InsightsRange>('week');
+  const [historyRange, setHistoryRange] = useState<HistoryRange>('3m');
   const [today, setToday] = useState<string | null>(null);
   useEffect(() => setToday(todayKey(new Date())), []);
 
@@ -180,9 +190,17 @@ export default function InsightsPage() {
 
       {today ? (
         <section className="mt-6">
-          <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-            History
-          </h2>
+          <div className="mb-2 flex items-center justify-between gap-3 px-1">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">History</h2>
+            <div className="w-32 shrink-0">
+              <SegmentedControl
+                ariaLabel="History range"
+                value={historyRange}
+                onChange={setHistoryRange}
+                options={HISTORY_OPTIONS}
+              />
+            </div>
+          </div>
           <div className="space-y-3">
             {habits.map((habit) => (
               <HabitHistoryCard
@@ -191,6 +209,7 @@ export default function InsightsPage() {
                 completions={completionsByHabit.get(habit.id) ?? []}
                 today={today}
                 weekStartsOn={settings.weekStartsOn}
+                weeks={HISTORY_WEEKS[historyRange]}
               />
             ))}
           </div>

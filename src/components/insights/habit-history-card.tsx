@@ -15,10 +15,12 @@ interface Props {
   completions: Completion[];
   today: DateKey;
   weekStartsOn: WeekStart;
+  /** How many week columns of history to show. */
+  weeks?: number;
 }
 
 /** One habit's contribution history: icon, name, streaks and a heatmap. */
-export function HabitHistoryCard({ habit, completions, today, weekStartsOn }: Props) {
+export function HabitHistoryCard({ habit, completions, today, weekStartsOn, weeks }: Props) {
   const { resolvedTheme } = useAppearance();
   const Icon = getHabitIcon(habit.icon);
   const { accent, soft } = getHabitAccent(habit.color, resolvedTheme);
@@ -47,6 +49,7 @@ export function HabitHistoryCard({ habit, completions, today, weekStartsOn }: Pr
           completions={completions}
           today={today}
           weekStartsOn={weekStartsOn}
+          weeks={weeks}
           showLegend
         />
       </div>

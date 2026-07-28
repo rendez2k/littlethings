@@ -12,6 +12,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.23',
+    date: 'Zoom your history',
+    items: [
+      'The History heatmaps in Insights can now zoom out — switch between 3 months, 6 months and a full year.',
+    ],
+  },
+  {
     version: '0.2.22',
     date: 'A calmer Today',
     items: [
