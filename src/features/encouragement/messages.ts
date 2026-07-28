@@ -15,22 +15,22 @@ type Template = (name: string) => string;
 
 // `{,name}` style: each template receives a ready-to-use, possibly-empty suffix.
 const START: Template[] = [
-  (n) => `A fresh start${n}. Pick one small thing.`,
-  (n) => `No rush${n} — begin whenever you're ready.`,
-  (n) => `Every big change starts small${n}.`,
+  (n) => `A fresh start${n}. Pick one small thing. 🌱`,
+  (n) => `No rush${n} — begin whenever you're ready. 🌤️`,
+  (n) => `Every big change starts small${n}. 🍃`,
 ];
 
 const MIDWAY: Template[] = [
-  (n) => `Nice going${n} — keep it gentle.`,
-  (n) => `You're building momentum${n}.`,
-  (n) => `Lovely${n}. One at a time.`,
-  (n) => `That's the spirit${n}.`,
+  (n) => `Nice going${n} — keep it gentle. 🌿`,
+  (n) => `You're building momentum${n}. 🌊`,
+  (n) => `Lovely${n}. One at a time. 🌸`,
+  (n) => `That's the spirit${n}. ✨`,
 ];
 
 const ALL_DONE: Template[] = [
   (n) => `Every habit done${n}. Beautiful day. ✨`,
-  (n) => `A perfect day${n} — you showed up.`,
-  (n) => `All complete${n}. Time to rest easy.`,
+  (n) => `A perfect day${n} — you showed up. 🌟`,
+  (n) => `All complete${n}. Time to rest easy. 🌙`,
 ];
 
 function pick(list: Template[], seed: number, name: string): string {

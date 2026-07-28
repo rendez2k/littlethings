@@ -165,10 +165,10 @@ export default function TodayPage() {
       {view.entries.length === 0 ? (
         <PlaceholderPanel
           icon={CalendarClock}
-          title="Nothing planned."
+          title="Nothing planned 🌤️"
           description={
             isToday
-              ? 'None of your habits are scheduled today. Enjoy the breather, or add something new.'
+              ? 'None of your habits are scheduled today. Enjoy the breather, or add something new. 🍵'
               : 'Nothing was scheduled on this day.'
           }
           action={

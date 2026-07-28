@@ -98,7 +98,7 @@ export function TodayHabitCard({ entry, streak, date, today, showStreak = true, 
             >
               <span className="truncate">
                 {showDone ? (
-                  'Done for today.'
+                  'Done for today 🌿'
                 ) : (
                   <>
                     {scheduleLabel(habit.schedule)}
