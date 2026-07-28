@@ -12,6 +12,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.22',
+    date: 'A calmer Today',
+    items: [
+      'Today’s progress ring now shows how many you’ve done right in its centre, with a warmer line and a gentle nudge toward what’s left.',
+      'Finish a habit and the row quietly acknowledges it — “Done for today.”, or your run so far when you’re on a streak.',
+    ],
+  },
+  {
     version: '0.2.15',
     date: 'See your history',
     items: [
