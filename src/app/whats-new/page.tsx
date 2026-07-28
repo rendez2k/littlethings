@@ -12,6 +12,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.25',
+    date: 'A little more warmth',
+    items: [
+      'A gentle sprinkle of emoji through the encouragement lines, completions and empty screens — a bit more life, still calm. 🌱',
+    ],
+  },
+  {
     version: '0.2.23',
     date: 'Zoom your history',
     items: [

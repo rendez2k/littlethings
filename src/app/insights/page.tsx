@@ -98,8 +98,8 @@ export default function InsightsPage() {
         <PageHeader title="Insights" subtitle="Your progress at a glance" />
         <PlaceholderPanel
           icon={BarChart3}
-          title="No insights yet"
-          description="Create a habit and check a few days off — your trends and streaks will appear here."
+          title="No insights yet 🌱"
+          description="Create a habit and check a few days off — your trends and streaks will appear here. 📈"
         />
       </>
     );
@@ -140,8 +140,8 @@ export default function InsightsPage() {
       {lowData ? (
         <PlaceholderPanel
           icon={Sparkles}
-          title="Your insights are just getting started"
-          description={`Nothing tracked ${rangeNoun} yet. Check off a habit or two and your trends will grow.`}
+          title="Your insights are just getting started ✨"
+          description={`Nothing tracked ${rangeNoun} yet. Check off a habit or two and your trends will grow. 🌱`}
         />
       ) : (
         <div className="space-y-5">
@@ -183,7 +183,7 @@ export default function InsightsPage() {
 
           <p className="px-1 text-center text-xs text-muted">
             {insights.totalCompletions} completion{insights.totalCompletions === 1 ? '' : 's'}{' '}
-            {rangeNoun}. Every one counts.
+            {rangeNoun}. Every one counts. 💛
           </p>
         </div>
       )}
