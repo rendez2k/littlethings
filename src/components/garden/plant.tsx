@@ -303,51 +303,59 @@ function daisy(stage: 2 | 3 | 4, { color, goldColor, bg }: Paint): ReactNode {
   );
 }
 
-/* ---- plum · lavender (a spike of small buds) ---- */
-function spike(cx: number, topY: number, rows: number, color: string): ReactNode {
+/* ---- plum · lavender (slender tapering flower spikes) ---- */
+/**
+ * A lavender raceme from `bottomY` up to `topY`: small paired buds, tightly
+ * packed and tapering to a point at the top. `scale` trims the whole spike for
+ * the shorter side-stems.
+ */
+function spike(cx: number, topY: number, bottomY: number, color: string, scale = 1): ReactNode {
   const buds: ReactNode[] = [];
-  for (let i = 0; i < rows; i++) {
-    const y = topY + i * 3.4;
-    const off = i % 2 === 0 ? 2 : -2;
-    buds.push(<circle key={`l${i}`} cx={cx + off} cy={y} r="1.8" fill={color} />);
-    buds.push(<circle key={`r${i}`} cx={cx - off} cy={y + 1.4} r="1.8" fill={color} opacity="0.85" />);
+  const n = Math.max(3, Math.round((bottomY - topY) / 2.4));
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1); // 0 at the pointed tip → 1 at the base
+    const y = topY + (bottomY - topY) * t;
+    const r = (0.9 + 1.1 * t) * scale;
+    const off = (1.1 + 1.0 * t) * scale;
+    buds.push(<ellipse key={`l${i}`} cx={cx - off} cy={y} rx={r} ry={r * 1.15} fill={color} />);
+    buds.push(<ellipse key={`r${i}`} cx={cx + off} cy={y} rx={r} ry={r * 1.15} fill={color} opacity="0.88" />);
   }
-  buds.push(<circle key="tip" cx={cx} cy={topY - 2.4} r="1.5" fill={color} />);
+  buds.push(<circle key="tip" cx={cx} cy={topY - 1.6 * scale} r={0.9 * scale} fill={color} />);
   return <>{buds}</>;
 }
 function lavender(stage: 2 | 3 | 4, { color, goldColor }: Paint): ReactNode {
   if (stage === 2) {
     return (
       <>
-        {stem(24, color, 1.8)}
-        {leaf(22, 40, 3, 6, -8, color)}
-        {leaf(34, 40, 3, 6, 8, color)}
-        {spike(28, 18, 2, color)}
+        {stem(27, color, 1.8)}
+        {leaf(23, 41, 2.4, 7, -8, color)}
+        {leaf(33, 41, 2.4, 7, 8, color)}
+        {spike(28, 17, 27, color)}
       </>
     );
   }
   if (stage === 3) {
     return (
       <>
-        {stem(28, color)}
-        {leaf(21, 41, 3.2, 7, -8, color)}
-        {leaf(35, 41, 3.2, 7, 8, color)}
-        {spike(28, 15, 4, color)}
+        {stem(29, color)}
+        {leaf(22, 42, 2.6, 8, -8, color)}
+        {leaf(34, 42, 2.6, 8, 8, color)}
+        {spike(28, 12, 28, color)}
       </>
     );
   }
-  // stage 4: three tall spikes.
+  // stage 4: a tall central spike flanked by two shorter, slimmer ones.
   return (
     <>
-      <path d="M28 46 L22 22" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M28 46 Q26 34 22 26" stroke={color} strokeWidth="1.6" strokeLinecap="round" fill="none" />
       <path d="M28 46 L28 16" stroke={color} strokeWidth="2" strokeLinecap="round" />
-      <path d="M28 46 L34 22" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
-      {leaf(20, 42, 3.4, 8, -8, color)}
-      {leaf(36, 42, 3.4, 8, 8, color)}
-      {spike(22, 15, 3, color)}
-      {spike(28, 11, 4, color)}
-      {spike(34, 15, 3, color)}
-      <circle cx="28" cy="8" r="1.3" fill={goldColor} />
+      <path d="M28 46 Q30 34 34 26" stroke={color} strokeWidth="1.6" strokeLinecap="round" fill="none" />
+      {leaf(21, 43, 2.6, 8, -8, color)}
+      {leaf(35, 43, 2.6, 8, 8, color)}
+      {spike(21, 17, 26, color, 0.82)}
+      {spike(28, 10, 26, color)}
+      {spike(35, 17, 26, color, 0.82)}
+      <circle cx="28" cy="8" r="1.2" fill={goldColor} />
     </>
   );
 }
