@@ -1,0 +1,267 @@
+/* =========================================================================
+   Garden — Little Things redesign design system.
+   Ported from the design handoff (colors_and_type.css). Loaded after
+   globals.css so it can also remap the app's existing Tailwind tokens to
+   the garden palette (keeps not-yet-reskinned screens coherent).
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Surfaces — deep dusk, slight green cast */
+  --gd-bg:         oklch(0.18 0.03 160);
+  --gd-bg-soft:    oklch(0.22 0.028 160);
+  --gd-bg-soft-2:  oklch(0.26 0.026 158);
+  --gd-bg-glow:    oklch(0.24 0.03 160);
+
+  /* Ink */
+  --gd-cream:       oklch(0.94 0.02 90);
+  --gd-cream-soft:  oklch(0.75 0.02 90);
+  --gd-cream-faint: oklch(0.55 0.015 90);
+  --gd-hair:        oklch(0.32 0.02 160);
+  --gd-hair-strong: oklch(0.38 0.02 160);
+
+  /* Botanical accents */
+  --gd-moss:  oklch(0.62 0.14 145);
+  --gd-bloom: oklch(0.72 0.15 30);
+  --gd-sky:   oklch(0.68 0.13 220);
+  --gd-gold:  oklch(0.78 0.15 85);
+  --gd-plum:  oklch(0.70 0.14 320);
+  --gd-moss-dim: oklch(0.5 0.1 145);
+
+  --gd-danger: oklch(0.62 0.18 25);
+
+  --gd-moss-15:  oklch(0.62 0.14 145 / 0.15);
+  --gd-moss-35:  oklch(0.62 0.14 145 / 0.35);
+  --gd-bloom-15: oklch(0.72 0.15 30 / 0.15);
+
+  --gd-soil-top:    oklch(0.32 0.04 60);
+  --gd-soil-bottom: oklch(0.22 0.03 55);
+
+  /* Type */
+  --gd-font-display: 'Newsreader', 'Cormorant Garamond', Georgia, serif;
+  --gd-font-ui:      'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  --gd-font-mono:    'IBM Plex Mono', ui-monospace, monospace;
+
+  --gd-size-display-lg: 40px;
+  --gd-size-display-md: 30px;
+  --gd-size-display-sm: 22px;
+  --gd-size-body-lg: 17px;
+  --gd-size-body:    15px;
+  --gd-size-body-sm: 13px;
+  --gd-size-meta:    12px;
+  --gd-size-label:   10px;
+  --gd-size-eyebrow:  9px;
+
+  --gd-lh-tight:  1.05;
+  --gd-lh-snug:   1.2;
+  --gd-lh-normal: 1.45;
+  --gd-ls-display: -0.01em;
+  --gd-ls-label:   0.15em;
+
+  --gd-radius-md: 12px;
+  --gd-radius-lg: 16px;
+  --gd-radius-xl: 20px;
+  --gd-radius-pill: 999px;
+
+  --gd-shadow-plot: inset 0 -20px 40px -20px oklch(0.14 0.03 160);
+  --gd-glow-moss: 0 0 8px var(--gd-moss);
+  --gd-glow-gold: 0 0 8px var(--gd-gold);
+
+  --gd-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --gd-dur-fast:   180ms;
+  --gd-dur-med:    320ms;
+  --gd-dur-slow:   600ms;
+}
+
+/* -------------------------------------------------------------------------
+   Remap the app's existing Tailwind semantic tokens (space-separated RGB, as
+   `rgb(var(--color-x))`) to garden values. `:root:root` out-specifies the
+   theme/palette attribute blocks in globals.css so the garden world wins in
+   every theme. Screens not yet fully reskinned still read as garden.
+   ------------------------------------------------------------------------- */
+:root:root {
+  color-scheme: dark;
+  --color-background: 24 31 28;
+  --color-surface: 30 38 34;
+  --color-elevated: 37 45 41;
+  --color-text: 238 231 216;
+  --color-muted: 168 160 141;
+  --color-border: 47 56 51;
+  --color-destructive: 200 80 63;
+  --color-destructive-foreground: 24 31 28;
+  --color-success: 107 163 112;
+  --color-primary: 107 163 112;
+  --color-primary-foreground: 24 31 28;
+  --color-primary-soft: 37 45 41;
+  --color-focus: 107 163 112;
+  --shadow-card: 0 1px 2px oklch(0.1 0.02 160 / 0.4), 0 6px 16px oklch(0.1 0.02 160 / 0.4);
+}
+
+body {
+  font-family: var(--gd-font-ui);
+}
+
+/* Atmospheric radial applied on the app shell */
+.gd-atmos {
+  background-color: var(--gd-bg);
+  background-image: radial-gradient(ellipse at 50% 0%, var(--gd-bg-glow) 0%, var(--gd-bg) 60%);
+}
+
+/* ---- Semantic type ---- */
+.gd-eyebrow {
+  font-family: var(--gd-font-mono);
+  font-size: var(--gd-size-eyebrow);
+  letter-spacing: var(--gd-ls-label);
+  text-transform: uppercase;
+  color: var(--gd-cream-faint);
+  font-weight: 500;
+}
+.gd-eyebrow--accent { color: var(--gd-moss); }
+.gd-eyebrow--warm   { color: var(--gd-bloom); }
+
+.gd-h1, .gd-h2, .gd-h3 {
+  font-family: var(--gd-font-display);
+  font-weight: 400;
+  letter-spacing: var(--gd-ls-display);
+  color: var(--gd-cream);
+  margin: 0;
+}
+.gd-h1 { font-size: var(--gd-size-display-lg); line-height: var(--gd-lh-tight); }
+.gd-h2 { font-size: var(--gd-size-display-md); line-height: var(--gd-lh-snug); }
+.gd-h3 { font-size: var(--gd-size-display-sm); line-height: var(--gd-lh-snug); }
+.gd-h1 em, .gd-h2 em, .gd-h3 em { font-style: italic; color: var(--gd-moss); }
+
+.gd-body    { font-size: var(--gd-size-body); line-height: var(--gd-lh-normal); color: var(--gd-cream); }
+.gd-body-sm { font-size: var(--gd-size-body-sm); line-height: var(--gd-lh-normal); color: var(--gd-cream-soft); }
+.gd-meta    { font-size: var(--gd-size-meta); color: var(--gd-cream-soft); }
+.gd-numeric { font-family: var(--gd-font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+.gd-quote   { font-family: var(--gd-font-display); font-style: italic; font-size: var(--gd-size-body-lg); line-height: var(--gd-lh-normal); color: var(--gd-cream); }
+
+/* ---- Surfaces ---- */
+.gd-card {
+  background: var(--gd-bg-soft);
+  border: 1px solid var(--gd-hair);
+  border-radius: var(--gd-radius-md);
+  padding: 16px;
+}
+.gd-card--raised { background: var(--gd-bg-soft-2); }
+.gd-card--accent { border-color: var(--gd-moss); background: var(--gd-moss-35); }
+.gd-card--warm   { border-color: var(--gd-bloom); background: var(--gd-bloom-15); }
+
+.gd-plot {
+  border-radius: var(--gd-radius-xl);
+  padding: 20px;
+  background: linear-gradient(180deg, var(--gd-bg-soft), var(--gd-bg-soft-2));
+  border: 1px solid var(--gd-hair);
+  box-shadow: var(--gd-shadow-plot);
+}
+.gd-soil {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--gd-soil-top), var(--gd-soil-bottom));
+  box-shadow: inset 0 1px 0 oklch(0.38 0.04 60);
+}
+
+/* ---- Buttons ---- */
+.gd-btn {
+  font-family: var(--gd-font-ui);
+  font-size: var(--gd-size-body-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 12px 22px;
+  border-radius: var(--gd-radius-pill);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--gd-dur-fast) var(--gd-ease-out), transform var(--gd-dur-fast) var(--gd-ease-out), box-shadow var(--gd-dur-fast) var(--gd-ease-out);
+}
+.gd-btn:active { transform: scale(0.97); }
+.gd-btn--primary { background: var(--gd-cream); color: var(--gd-bg); }
+.gd-btn--accent { background: var(--gd-moss); color: var(--gd-bg); }
+.gd-btn--accent:hover { box-shadow: var(--gd-glow-moss); }
+.gd-btn--ghost { background: transparent; color: var(--gd-cream); border-color: var(--gd-hair-strong); }
+.gd-btn--ghost:hover { background: var(--gd-bg-soft); }
+
+/* ---- Fields & chips ---- */
+.gd-field {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--gd-bg-soft);
+  border: 1px solid var(--gd-hair);
+  border-radius: var(--gd-radius-md);
+  color: var(--gd-cream);
+  font-family: var(--gd-font-display);
+  font-size: 18px;
+  transition: border-color var(--gd-dur-fast);
+}
+.gd-field:focus { outline: none; border-color: var(--gd-moss); box-shadow: 0 0 0 3px var(--gd-moss-15); }
+.gd-field::placeholder { color: var(--gd-cream-faint); }
+
+.gd-chip {
+  padding: 8px 14px;
+  border-radius: var(--gd-radius-pill);
+  font-size: var(--gd-size-meta);
+  background: var(--gd-bg-soft);
+  color: var(--gd-cream);
+  border: 1px solid var(--gd-hair);
+  cursor: pointer;
+  transition: background var(--gd-dur-fast), color var(--gd-dur-fast);
+}
+.gd-chip[aria-pressed='true'], .gd-chip--active {
+  background: var(--gd-moss);
+  color: var(--gd-bg);
+  border-color: var(--gd-moss);
+  font-weight: 600;
+}
+
+.gd-dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
+.gd-dot--glow { box-shadow: 0 0 8px currentColor; }
+
+/* ---- Tab bar ---- */
+.gd-tabbar {
+  padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, transparent, var(--gd-bg));
+  display: flex;
+  gap: 4px;
+}
+.gd-tab {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  color: var(--gd-cream-faint);
+  font-size: var(--gd-size-label);
+  letter-spacing: 0.04em;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 220ms var(--gd-ease-out), color 220ms;
+}
+.gd-tab[aria-current='page'] { background: var(--gd-bg-soft); color: var(--gd-cream); }
+
+/* ---- Motion ---- */
+@keyframes gd-grow {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes gd-bloom { 0% { transform: scale(0.6); } 100% { transform: scale(1); } }
+@keyframes gd-wilt {
+  0%   { transform: rotate(0deg) translateY(0); opacity: 1; }
+  100% { transform: rotate(6deg) translateY(2px); opacity: 0.5; }
+}
+.gd-anim-grow  { animation: gd-grow  var(--gd-dur-slow) var(--gd-ease-out); transform-origin: 50% 90%; }
+.gd-anim-bloom { animation: gd-bloom var(--gd-dur-med)  var(--gd-ease-out); }
+.gd-anim-wilt  { animation: gd-wilt  var(--gd-dur-slow) var(--gd-ease-out) forwards; }
+
+@keyframes gd-firefly-drift {
+  0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+  25%      { transform: translate(6px, -8px); opacity: 0.9; }
+  50%      { transform: translate(-4px, -14px); opacity: 0.5; }
+  75%      { transform: translate(-8px, -4px); opacity: 0.8; }
+}
+@keyframes gd-breath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .gd-anim-grow, .gd-anim-bloom, .gd-anim-wilt { animation: none; }
+}

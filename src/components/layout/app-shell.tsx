@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BottomNav } from '@/components/navigation/bottom-nav';
+import { GardenTabBar } from '@/components/garden/tab-bar';
 import { OfflineIndicator } from '@/components/layout/offline-indicator';
 import { Onboarding } from '@/components/onboarding/onboarding';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
@@ -20,13 +20,13 @@ import { ScrollReset } from '@/components/layout/scroll-reset';
  */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="gd-atmos fixed inset-0 overflow-hidden">
       <div className="mx-auto flex h-full w-full max-w-app flex-col pt-safe-top">
         <OfflineIndicator />
-        <main id="main-content" className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6">
+        <main id="main-content" className="flex-1 overflow-y-auto overscroll-contain">
           {children}
         </main>
-        <BottomNav />
+        <GardenTabBar />
         <ScrollReset />
       </div>
       <InstallPrompt />

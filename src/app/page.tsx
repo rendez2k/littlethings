@@ -1,207 +1,199 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { CalendarClock, Plus } from 'lucide-react';
-import { PageHeader } from '@/components/layout/page-header';
-import { PlaceholderPanel } from '@/components/ui/placeholder-panel';
-import { ProgressRing } from '@/components/ui/progress-ring';
-import { Button } from '@/components/ui/button';
-import { Welcome } from '@/components/today/welcome';
-import { DateStrip } from '@/components/today/date-strip';
-import { TodayHabitCard } from '@/components/today/today-habit-card';
-import { useHabitEditor } from '@/components/habits/habit-editor-provider';
-import { useActiveHabits, useAllCompletions, useCompletionsForDate } from '@/features/habits/hooks';
-import { useAppSettings } from '@/features/settings/hooks';
-import { buildDayView, everResolvedHabitIds } from '@/features/completions/day-view';
-import { useTodayWidgetSync } from '@/features/widget/use-widget-sync';
-import { computeStreak, type StreakResult } from '@/features/streaks/streak';
-import type { Completion } from '@/features/completions/schemas';
-import { encouragement } from '@/features/encouragement/messages';
-import { fromDateKey, todayKey, type DateKey } from '@/lib/dates';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Settings2 } from 'lucide-react';
+import { getCompletionService } from '@/features/habits/hooks';
+import { useGardenToday, type GardenEntry } from '@/features/garden/use-garden';
+import { PlantAnimated, FireflyField, AnimatedNumber, ScreenEnter } from '@/components/garden/motion';
+import { todayKey } from '@/lib/dates';
+
+function dateLabel(): string {
+  return new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function HabitTile({ entry, onCheck }: { entry: GardenEntry; onCheck: (id: string) => void }) {
+  const [animating, setAnimating] = useState(false);
+  const [ff, setFf] = useState(false);
+  const check = () => {
+    if (entry.done) return;
+    setAnimating(true);
+    setFf(true);
+    setTimeout(() => onCheck(entry.habit.id), 260);
+    setTimeout(() => {
+      setAnimating(false);
+      setFf(false);
+    }, 900);
+  };
+  return (
+    <button
+      type="button"
+      onClick={check}
+      aria-label={entry.done ? `${entry.habit.name}, tended` : `Tend ${entry.habit.name}`}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '10px 4px 6px',
+        borderRadius: 12,
+        background: entry.done ? 'var(--gd-moss-35)' : 'transparent',
+        border: `1px solid ${entry.done ? 'var(--gd-moss)' : 'transparent'}`,
+        position: 'relative',
+        cursor: 'pointer',
+        transition: 'background 220ms, border-color 220ms',
+        color: 'var(--gd-cream)',
+      }}
+    >
+      {entry.done ? (
+        <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 11, color: 'var(--gd-moss)', fontWeight: 700 }}>✓</span>
+      ) : null}
+      <PlantAnimated stage={entry.stage} color={entry.colorVar} size={62} animate={animating ? 'grow' : null} fireflies={ff} />
+      <div style={{ marginTop: 4, fontSize: 12, fontWeight: 500 }}>{entry.habit.name}</div>
+      <div className="gd-numeric" style={{ fontSize: 9, color: 'var(--gd-cream-faint)' }}>
+        {entry.current}d
+      </div>
+    </button>
+  );
+}
+
+function HabitRow({ entry, onCheck }: { entry: GardenEntry; onCheck: (id: string) => void }) {
+  const [animating, setAnimating] = useState(false);
+  const check = () => {
+    if (entry.done) return;
+    setAnimating(true);
+    setTimeout(() => onCheck(entry.habit.id), 200);
+  };
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 14px',
+        marginBottom: 6,
+        borderRadius: 12,
+        background: 'var(--gd-bg-soft)',
+        border: '1px solid var(--gd-hair)',
+      }}
+    >
+      <span className="gd-dot gd-dot--glow" style={{ color: entry.colorVar, background: entry.colorVar }} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13 }}>{entry.habit.name}</div>
+        {entry.progress ? (
+          <div className="gd-numeric" style={{ fontSize: 10, color: 'var(--gd-cream-faint)', marginTop: 2 }}>
+            {entry.progress}
+          </div>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        onClick={check}
+        aria-label={`Tend ${entry.habit.name}`}
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          border: '1.5px solid var(--gd-cream-faint)',
+          background: 'transparent',
+          cursor: 'pointer',
+          padding: 0,
+          transition: 'transform 180ms cubic-bezier(0.16,1,0.3,1)',
+          transform: animating ? 'scale(1.15)' : 'scale(1)',
+        }}
+      />
+    </div>
+  );
+}
 
 export default function TodayPage() {
-  const habits = useActiveHabits();
-  const settings = useAppSettings();
-  const { openCreate } = useHabitEditor();
-  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const data = useGardenToday();
 
-  const [today, setToday] = useState<DateKey | null>(null);
-  const [selectedDate, setSelectedDate] = useState<DateKey | null>(null);
-  useEffect(() => {
-    const t = todayKey(new Date());
-    setToday(t);
-    setSelectedDate(t);
-  }, []);
+  const onCheck = (id: string) => {
+    void getCompletionService().complete(id, todayKey(new Date()));
+  };
 
-  const completionsForDate = useCompletionsForDate(selectedDate ?? '');
-  const allCompletions = useAllCompletions();
-
-  const dateLabel = useMemo(() => {
-    if (!selectedDate) return ' ';
-    return fromDateKey(selectedDate).toLocaleDateString(undefined, {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    });
-  }, [selectedDate]);
-
-  // Group all completion records by habit so streaks are computed in memory.
-  const completionsByHabit = useMemo(() => {
-    const grouped = new Map<string, Completion[]>();
-    for (const c of allCompletions ?? []) {
-      const list = grouped.get(c.habitId) ?? [];
-      list.push(c);
-      grouped.set(c.habitId, list);
-    }
-    return grouped;
-  }, [allCompletions]);
-
-  // Habit ids resolved (completed or skipped) at least once — lets a one-off
-  // linger on today until it's actually done, not merely touched.
-  const everCompletedHabitIds = useMemo(
-    () => everResolvedHabitIds(habits ?? [], allCompletions ?? []),
-    [habits, allCompletions],
-  );
-
-  // Mirror today's progress to the native home-screen widget (no-op on web).
-  useTodayWidgetSync(habits, completionsForDate, selectedDate, today, everCompletedHabitIds);
-
-  if (habits === undefined || today === null || selectedDate === null) {
-    return <PageHeader title="Today" subtitle=" " />;
+  if (!mounted || !data) {
+    return <div style={{ padding: '54px 22px' }} />;
   }
 
-  if (habits.length === 0) {
-    return <Welcome />;
-  }
-
-  const view = buildDayView(
-    habits,
-    completionsForDate ?? [],
-    selectedDate,
-    today,
-    everCompletedHabitIds,
-  );
-  const isToday = selectedDate === today;
-  const doneCount = view.summary.completed + view.summary.skipped;
-  const remaining = view.summary.total - doneCount;
-  // A crisp remaining count under the encouragement line; the habits themselves
-  // are listed just below, so we don't repeat their names here.
-  const toGoLine = remaining > 0 ? `${remaining} to go` : dateLabel;
-  const encourageLine = settings.showMotivationalMessages
-    ? encouragement({
-        name: settings.displayName,
-        completed: doneCount,
-        total: view.summary.total,
-        seed: Number(selectedDate.slice(8, 10)),
-      })
-    : 'Keep going — small things add up.';
+  const { entries, doneCount, total } = data;
+  const remaining = entries.filter((e) => !e.done);
 
   return (
-    <>
-      <PageHeader
-        title="Today"
-        subtitle={dateLabel}
-        action={
-          <Button
-            size="sm"
-            aria-label="Add habit"
-            className="h-11 w-11 p-0"
-            onClick={() => openCreate()}
-          >
-            <Plus aria-hidden="true" className="h-5 w-5" />
-          </Button>
-        }
-      />
-
-      <DateStrip
-        selectedDate={selectedDate}
-        today={today}
-        weekStartsOn={settings.weekStartsOn}
-        onSelect={setSelectedDate}
-      />
-
-      {view.summary.total > 0 ? (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-card border border-border bg-surface px-4 py-3 shadow-card">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-text">
-              {isToday ? encourageLine : `${doneCount} of ${view.summary.total} complete`}
-            </p>
-            <p className="mt-0.5 truncate text-xs text-muted">{isToday ? toGoLine : dateLabel}</p>
+    <div style={{ padding: '54px 22px 16px' }}>
+      <ScreenEnter stagger={40}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+          <div>
+            <div className="gd-eyebrow">{dateLabel()}</div>
+            <h1 className="gd-h1" style={{ fontSize: 'var(--gd-size-display-md)', marginTop: 2 }}>
+              Your <em>garden</em>
+            </h1>
           </div>
-          <ProgressRing
-            ratio={view.summary.ratio}
-            size={64}
-            strokeWidth={6}
-            label={`${doneCount} of ${view.summary.total} complete`}
-            className="shrink-0"
-          >
-            <span className="flex flex-col items-center leading-none">
-              <span className="text-sm font-bold tabular-nums text-text">
-                {doneCount}
-                <span className="text-muted">/</span>
-                {view.summary.total}
-              </span>
-              <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted">
-                done
-              </span>
-            </span>
-          </ProgressRing>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Link href="/settings" aria-label="Settings" style={{ color: 'var(--gd-cream-faint)', display: 'flex' }}>
+              <Settings2 size={18} aria-hidden="true" />
+            </Link>
+            <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: 'var(--gd-bloom)' }}>
+              <AnimatedNumber value={doneCount} />/{total}
+            </div>
+          </div>
         </div>
-      ) : null}
 
-      {!isToday ? (
-        <button
-          type="button"
-          onClick={() => setSelectedDate(today)}
-          className="mb-3 text-sm font-medium text-primary"
-        >
-          ← Back to today
-        </button>
-      ) : null}
+        {total > 0 ? (
+          <div className="gd-plot" style={{ marginTop: 22 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+              {entries.map((e) => (
+                <HabitTile key={e.habit.id} entry={e} onCheck={onCheck} />
+              ))}
+            </div>
+            <div className="gd-soil" style={{ marginTop: 6 }} />
+          </div>
+        ) : (
+          <div className="gd-card" style={{ marginTop: 22, textAlign: 'center', padding: 24 }}>
+            <div className="gd-eyebrow gd-eyebrow--accent">Nothing planted yet</div>
+            <div className="gd-quote" style={{ marginTop: 8 }}>
+              &ldquo;Every garden starts with one seed.&rdquo;
+            </div>
+            <Link href="/plant" className="gd-btn gd-btn--accent" style={{ display: 'inline-block', marginTop: 16, textDecoration: 'none' }}>
+              Plant your first
+            </Link>
+          </div>
+        )}
 
-      {view.entries.length === 0 ? (
-        <PlaceholderPanel
-          icon={CalendarClock}
-          title="Nothing planned 🌤️"
-          description={
-            isToday
-              ? 'None of your habits are scheduled today. Enjoy the breather, or add something new. 🍵'
-              : 'Nothing was scheduled on this day.'
-          }
-          action={
-            isToday ? (
-              <Button onClick={() => openCreate()}>
-                <Plus aria-hidden="true" className="h-4 w-4" />
-                Add a habit
-              </Button>
-            ) : undefined
-          }
-        />
-      ) : (
-        <ul className="space-y-3">
-          {view.entries.map((entry) => {
-            const streak: StreakResult = computeStreak(
-              entry.habit,
-              completionsByHabit.get(entry.habit.id) ?? [],
-              today,
-              settings.weekStartsOn,
-            );
-            return (
-              <li key={entry.habit.id} className="motion-safe:animate-row-in">
-                <TodayHabitCard
-                  entry={entry}
-                  streak={streak}
-                  date={selectedDate}
-                  today={today}
-                  showStreak={settings.showStreaks}
-                  onOpen={(habit) => router.push(`/habits/${habit.id}`)}
-                />
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </>
+        {remaining.length > 0 ? (
+          <div style={{ marginTop: 20 }}>
+            <div className="gd-eyebrow">Still to tend</div>
+            <div style={{ marginTop: 8 }}>
+              {remaining.map((e) => (
+                <HabitRow key={e.habit.id} entry={e} onCheck={onCheck} />
+              ))}
+            </div>
+          </div>
+        ) : total > 0 ? (
+          <div
+            style={{
+              marginTop: 24,
+              padding: 20,
+              borderRadius: 16,
+              background: 'var(--gd-moss-35)',
+              border: '1px solid var(--gd-moss)',
+              textAlign: 'center',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <FireflyField count={8} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div className="gd-eyebrow gd-eyebrow--accent">Tended, all {total}.</div>
+              <div className="gd-quote" style={{ marginTop: 8, fontSize: 20 }}>
+                &ldquo;The evening is yours.&rdquo;
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ScreenEnter>
+    </div>
   );
 }

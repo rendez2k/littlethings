@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="bg2" cx="50%" cy="40%" r="80%">
+      <stop offset="0%"  stop-color="oklch(0.26 0.03 160)"/>
+      <stop offset="100%" stop-color="oklch(0.18 0.03 160)"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg2)"/>
+
+  <!-- One sprout, big and centered. Two leaves + short stem. -->
+  <g transform="translate(512, 620)">
+    <!-- Stem -->
+    <path d="M0 100 L0 -80" stroke="oklch(0.62 0.14 145)" stroke-width="34" stroke-linecap="round"/>
+
+    <!-- Two symmetric leaves, generous scale -->
+    <path d="M0 -60 Q -180 -80, -220 -180 Q -80 -220, 0 -80 Z"
+          fill="oklch(0.62 0.14 145)"/>
+    <path d="M0 -60 Q 180 -80, 220 -180 Q 80 -220, 0 -80 Z"
+          fill="oklch(0.62 0.14 145)"/>
+
+    <!-- Leaf veins (subtle darker) -->
+    <path d="M-30 -80 Q -110 -110, -190 -175"
+          stroke="oklch(0.5 0.1 145)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
+    <path d="M30 -80 Q 110 -110, 190 -175"
+          stroke="oklch(0.5 0.1 145)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+    <!-- Ground shadow -->
+    <ellipse cx="0" cy="110" rx="90" ry="16" fill="oklch(0.32 0.02 160)" opacity="0.6"/>
+  </g>
+
+  <!-- A single firefly, upper right — the "spark" of growth -->
+  <circle cx="740" cy="260" r="10" fill="oklch(0.78 0.15 85)"/>
+  <circle cx="740" cy="260" r="26" fill="oklch(0.78 0.15 85)" opacity="0.3"/>
+  <circle cx="740" cy="260" r="48" fill="oklch(0.78 0.15 85)" opacity="0.1"/>
+</svg>
