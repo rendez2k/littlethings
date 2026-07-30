@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: 'Offline' };
  */
 export default function OfflinePage() {
   return (
-    <div className="pt-16">
+    <div className="px-6 pt-16">
       <PlaceholderPanel
         icon={CloudOff}
         title="You're offline"
