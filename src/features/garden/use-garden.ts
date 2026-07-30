@@ -5,7 +5,7 @@ import { useActiveHabits, useAllCompletions, useCompletionsForDate } from '@/fea
 import { useAppSettings } from '@/features/settings/hooks';
 import { buildDayView, everResolvedHabitIds } from '@/features/completions/day-view';
 import { computeStreak } from '@/features/streaks/streak';
-import { targetProgress } from '@/features/completions/logic';
+import { goalValue } from '@/features/completions/logic';
 import { targetLabel } from '@/features/habits/labels';
 import type { Habit } from '@/features/habits/schemas';
 import type { Completion } from '@/features/completions/schemas';
@@ -25,8 +25,15 @@ export interface GardenHabit {
 export interface GardenEntry extends GardenHabit {
   status: DayStatus;
   done: boolean;
+  skipped: boolean;
   /** e.g. "5 / 8 glasses" for count/duration habits with progress today. */
   progress: string | null;
+  /** Raw values so Today can render a stepper for count/duration habits. */
+  targetType: 'boolean' | 'count' | 'duration';
+  value: number;
+  goal: number;
+  step: number;
+  unit: string;
 }
 
 function completionsByHabit(all: Completion[] | undefined): Map<string, Completion[]> {
@@ -83,12 +90,17 @@ export function useGardenToday(): { entries: GardenEntry[]; doneCount: number; t
     const entries: GardenEntry[] = view.entries.map((e) => {
       const base = enrich(e.habit, byHabit, today, settings.weekStartsOn);
       const done = e.status === 'complete' || e.status === 'skipped';
+      const skipped = e.status === 'skipped';
+      const target = e.habit.target;
+      const value = e.completion && !e.completion.deletedAt ? e.completion.value : 0;
+      const goal = goalValue(target);
+      const step = target.type === 'duration' ? 5 : 1;
+      const unit = target.type === 'duration' ? 'min' : target.type === 'count' ? target.unit : '';
       let progress: string | null = null;
-      if (e.habit.target.type !== 'boolean' && e.completion && !e.completion.deletedAt) {
-        const { value, goal } = targetProgress(e.habit.target, e.completion.value);
-        if (value > 0 && value < goal) progress = `${value} / ${targetLabel(e.habit.target)}`;
+      if (target.type !== 'boolean' && value > 0 && value < goal) {
+        progress = `${value} / ${targetLabel(target)}`;
       }
-      return { ...base, status: e.status, done, progress };
+      return { ...base, status: e.status, done, skipped, progress, targetType: target.type, value, goal, step, unit };
     });
 
     return { entries, doneCount: view.summary.completed + view.summary.skipped, total: view.summary.total };

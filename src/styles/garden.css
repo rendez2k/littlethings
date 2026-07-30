@@ -217,6 +217,26 @@ body {
 .gd-dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
 .gd-dot--glow { box-shadow: 0 0 8px currentColor; }
 
+/* ---- Stepper (count / duration) ---- */
+.gd-step-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--gd-hair-strong);
+  background: var(--gd-bg-soft);
+  color: var(--gd-cream);
+  font-size: 24px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--gd-dur-fast) var(--gd-ease-out), background var(--gd-dur-fast);
+}
+.gd-step-btn:active { transform: scale(0.92); }
+.gd-step-btn:disabled { opacity: 0.3; cursor: default; }
+.gd-step-btn--accent { background: var(--gd-moss); border-color: var(--gd-moss); color: var(--gd-bg); }
+
 /* ---- Tab bar ---- */
 .gd-tabbar {
   padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
@@ -262,6 +282,10 @@ body {
 }
 @keyframes gd-breath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
 
+@keyframes gd-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gd-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
 @media (prefers-reduced-motion: reduce) {
   .gd-anim-grow, .gd-anim-bloom, .gd-anim-wilt { animation: none; }
+  .gd-step-btn:active { transform: none; }
 }

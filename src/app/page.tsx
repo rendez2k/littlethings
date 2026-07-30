@@ -6,17 +6,25 @@ import { Settings2 } from 'lucide-react';
 import { getCompletionService } from '@/features/habits/hooks';
 import { useGardenToday, type GardenEntry } from '@/features/garden/use-garden';
 import { PlantAnimated, FireflyField, AnimatedNumber, ScreenEnter } from '@/components/garden/motion';
+import { TendSheet } from '@/components/garden/tend-sheet';
 import { todayKey } from '@/lib/dates';
 
 function dateLabel(): string {
   return new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
-function HabitTile({ entry, onCheck }: { entry: GardenEntry; onCheck: (id: string) => void }) {
+function HabitTile({ entry, onCheck, onOpen }: { entry: GardenEntry; onCheck: (id: string) => void; onOpen: (e: GardenEntry) => void }) {
   const [animating, setAnimating] = useState(false);
   const [ff, setFf] = useState(false);
+  // A plain daily "just show up" that isn't done yet tends in one tap, with the
+  // grow flourish right on the plot. Everything else — counts, skips, undo —
+  // opens the tend sheet where there's room for the controls.
+  const quickTend = entry.targetType === 'boolean' && !entry.done;
   const check = () => {
-    if (entry.done) return;
+    if (!quickTend) {
+      onOpen(entry);
+      return;
+    }
     setAnimating(true);
     setFf(true);
     setTimeout(() => onCheck(entry.habit.id), 260);
@@ -29,7 +37,7 @@ function HabitTile({ entry, onCheck }: { entry: GardenEntry; onCheck: (id: strin
     <button
       type="button"
       onClick={check}
-      aria-label={entry.done ? `${entry.habit.name}, tended` : `Tend ${entry.habit.name}`}
+      aria-label={entry.done ? `${entry.habit.name}, tended — adjust` : `Tend ${entry.habit.name}`}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -56,52 +64,55 @@ function HabitTile({ entry, onCheck }: { entry: GardenEntry; onCheck: (id: strin
   );
 }
 
-function HabitRow({ entry, onCheck }: { entry: GardenEntry; onCheck: (id: string) => void }) {
-  const [animating, setAnimating] = useState(false);
-  const check = () => {
-    if (entry.done) return;
-    setAnimating(true);
-    setTimeout(() => onCheck(entry.habit.id), 200);
-  };
+function HabitRow({ entry, onOpen }: { entry: GardenEntry; onOpen: (e: GardenEntry) => void }) {
+  const hint = entry.targetType !== 'boolean' ? `${entry.value} / ${entry.goal}${entry.unit ? ` ${entry.unit}` : ''}` : null;
   return (
-    <div
+    <button
+      type="button"
+      onClick={() => onOpen(entry)}
+      aria-label={`Tend ${entry.habit.name}`}
       style={{
         display: 'flex',
         alignItems: 'center',
         gap: 12,
+        width: '100%',
+        textAlign: 'left',
         padding: '10px 14px',
         marginBottom: 6,
         borderRadius: 12,
         background: 'var(--gd-bg-soft)',
         border: '1px solid var(--gd-hair)',
+        color: 'var(--gd-cream)',
+        cursor: 'pointer',
       }}
     >
       <span className="gd-dot gd-dot--glow" style={{ color: entry.colorVar, background: entry.colorVar }} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13 }}>{entry.habit.name}</div>
-        {entry.progress ? (
+        {entry.progress ?? hint ? (
           <div className="gd-numeric" style={{ fontSize: 10, color: 'var(--gd-cream-faint)', marginTop: 2 }}>
-            {entry.progress}
+            {entry.progress ?? hint}
           </div>
         ) : null}
       </div>
-      <button
-        type="button"
-        onClick={check}
-        aria-label={`Tend ${entry.habit.name}`}
+      <span
+        aria-hidden="true"
         style={{
           width: 28,
           height: 28,
           borderRadius: '50%',
           border: '1.5px solid var(--gd-cream-faint)',
-          background: 'transparent',
-          cursor: 'pointer',
-          padding: 0,
-          transition: 'transform 180ms cubic-bezier(0.16,1,0.3,1)',
-          transform: animating ? 'scale(1.15)' : 'scale(1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--gd-cream-faint)',
+          fontSize: 14,
+          flexShrink: 0,
         }}
-      />
-    </div>
+      >
+        ›
+      </span>
+    </button>
   );
 }
 
@@ -109,10 +120,12 @@ export default function TodayPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const data = useGardenToday();
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   const onCheck = (id: string) => {
     void getCompletionService().complete(id, todayKey(new Date()));
   };
+  const onOpen = (e: GardenEntry) => setActiveId(e.habit.id);
 
   if (!mounted || !data) {
     return <div style={{ padding: '54px 22px' }} />;
@@ -120,6 +133,7 @@ export default function TodayPage() {
 
   const { entries, doneCount, total } = data;
   const remaining = entries.filter((e) => !e.done);
+  const active = entries.find((e) => e.habit.id === activeId) ?? null;
 
   return (
     <div style={{ padding: '54px 22px 16px' }}>
@@ -145,7 +159,7 @@ export default function TodayPage() {
           <div className="gd-plot" style={{ marginTop: 22 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
               {entries.map((e) => (
-                <HabitTile key={e.habit.id} entry={e} onCheck={onCheck} />
+                <HabitTile key={e.habit.id} entry={e} onCheck={onCheck} onOpen={onOpen} />
               ))}
             </div>
             <div className="gd-soil" style={{ marginTop: 6 }} />
@@ -167,7 +181,7 @@ export default function TodayPage() {
             <div className="gd-eyebrow">Still to tend</div>
             <div style={{ marginTop: 8 }}>
               {remaining.map((e) => (
-                <HabitRow key={e.habit.id} entry={e} onCheck={onCheck} />
+                <HabitRow key={e.habit.id} entry={e} onOpen={onOpen} />
               ))}
             </div>
           </div>
@@ -194,6 +208,8 @@ export default function TodayPage() {
           </div>
         ) : null}
       </ScreenEnter>
+
+      {active ? <TendSheet entry={active} onClose={() => setActiveId(null)} /> : null}
     </div>
   );
 }

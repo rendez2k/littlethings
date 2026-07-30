@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useGardenHabits } from '@/features/garden/use-garden';
+import { useGardenHabits, type GardenHabit } from '@/features/garden/use-garden';
 import { Plant } from '@/components/garden/plant';
 import { ScreenEnter } from '@/components/garden/motion';
+import { HABIT_CATEGORIES, habitCategory } from '@/features/habits/categories';
 
 function AddSeedButton() {
   return (
@@ -32,10 +33,67 @@ function AddSeedButton() {
   );
 }
 
+function PlantCard({ h }: { h: GardenHabit }) {
+  return (
+    <Link
+      href={`/habits/${h.habit.id}`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: '12px 14px',
+        marginBottom: 8,
+        borderRadius: 16,
+        background: 'var(--gd-bg-soft)',
+        border: '1px solid var(--gd-hair)',
+        textDecoration: 'none',
+        color: 'var(--gd-cream)',
+      }}
+    >
+      <div
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 12,
+          flexShrink: 0,
+          background: 'var(--gd-bg-soft-2)',
+          border: '1px solid var(--gd-hair)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Plant stage={h.stage} color={h.colorVar} size={44} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 17, lineHeight: 1.2 }}>{h.habit.name}</div>
+        <div className="gd-eyebrow" style={{ marginTop: 3 }}>
+          {h.frequency} · stage {h.stage} of 4
+        </div>
+      </div>
+      <div style={{ textAlign: 'right' }}>
+        <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: h.colorVar, lineHeight: 1 }}>{h.current}</div>
+        <div className="gd-eyebrow">days</div>
+      </div>
+    </Link>
+  );
+}
+
 export default function PlantsPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const habits = useGardenHabits();
+
+  // Group into cadence beds (Daily / Weekly / …), preserving the streak sort
+  // within each and dropping empty beds.
+  const groups = useMemo(() => {
+    if (!habits) return [];
+    return HABIT_CATEGORIES.map(({ key, label }) => ({
+      key,
+      label,
+      habits: habits.filter((h) => habitCategory(h.habit) === key),
+    })).filter((g) => g.habits.length > 0);
+  }, [habits]);
 
   if (!mounted || !habits) return <div style={{ padding: '54px 22px' }} />;
 
@@ -60,49 +118,15 @@ export default function PlantsPage() {
               <div className="gd-body-sm">Nothing growing yet. Plant your first seed.</div>
             </div>
           ) : (
-            habits.map((h) => (
-              <Link
-                key={h.habit.id}
-                href={`/habits/${h.habit.id}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 14,
-                  padding: '12px 14px',
-                  marginBottom: 8,
-                  borderRadius: 16,
-                  background: 'var(--gd-bg-soft)',
-                  border: '1px solid var(--gd-hair)',
-                  textDecoration: 'none',
-                  color: 'var(--gd-cream)',
-                }}
-              >
-                <div
-                  style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: 12,
-                    flexShrink: 0,
-                    background: 'var(--gd-bg-soft-2)',
-                    border: '1px solid var(--gd-hair)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Plant stage={h.stage} color={h.colorVar} size={44} />
+            groups.map((g) => (
+              <section key={g.key} style={{ marginBottom: 20 }}>
+                <div className="gd-eyebrow" style={{ marginBottom: 8 }}>
+                  {g.label} · {g.habits.length}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 17, lineHeight: 1.2 }}>{h.habit.name}</div>
-                  <div className="gd-eyebrow" style={{ marginTop: 3 }}>
-                    {h.frequency} · stage {h.stage} of 4
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: h.colorVar, lineHeight: 1 }}>{h.current}</div>
-                  <div className="gd-eyebrow">days</div>
-                </div>
-              </Link>
+                {g.habits.map((h) => (
+                  <PlantCard key={h.habit.id} h={h} />
+                ))}
+              </section>
             ))
           )}
         </div>
