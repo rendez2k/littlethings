@@ -37,7 +37,7 @@ function LinkRow({
 export default function SettingsPage() {
   const isNative = useIsNativeApp();
   return (
-    <>
+    <div style={{ padding: '54px 22px 24px' }}>
       <PageHeader title="The shed" subtitle="Your tools and preferences." />
 
       <AppearanceSettings />
@@ -72,6 +72,6 @@ export default function SettingsPage() {
       </SettingsSection>
 
       <Footer />
-    </>
+    </div>
   );
 }
