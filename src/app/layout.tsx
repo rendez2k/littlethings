@@ -28,13 +28,8 @@ export const metadata: Metadata = {
     title: APP_NAME,
   },
   formatDetection: { telephone: false },
-  icons: {
-    icon: [
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
-  },
+  // Favicon + apple-touch icon come from the file convention (src/app/icon.svg
+  // and src/app/apple-icon.png). PWA install icons stay in the web manifest.
 };
 
 export const viewport: Viewport = {
