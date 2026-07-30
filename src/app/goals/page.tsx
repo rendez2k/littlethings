@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GoalEditor } from '@/components/goals/goal-editor';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { SeedEditor } from '@/components/garden/seed-editor';
 import { useGoals, getGoalService } from '@/features/goals/hooks';
 import type { Goal } from '@/features/goals/schemas';
 import { Plant, Seed } from '@/components/garden/plant';
@@ -28,6 +29,14 @@ export default function SeedsPage() {
   };
   const plant = (id: string) => {
     void getGoalService().toggleDone(id);
+  };
+  const move = (index: number, delta: number) => {
+    if (!goals) return;
+    const next = [...goals];
+    const to = index + delta;
+    if (to < 0 || to >= next.length) return;
+    [next[index], next[to]] = [next[to]!, next[index]!];
+    void getGoalService().reorder(next.map((g) => g.id));
   };
 
   if (!mounted || goals === undefined) return <div style={{ padding: '54px 22px' }} />;
@@ -111,6 +120,26 @@ export default function SeedsPage() {
                       </div>
                     </div>
                   </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <button
+                      type="button"
+                      onClick={() => move(i, -1)}
+                      disabled={i === 0}
+                      aria-label={`Move ${g.title} up`}
+                      style={{ background: 'none', border: 'none', cursor: i === 0 ? 'default' : 'pointer', color: 'var(--gd-cream-faint)', opacity: i === 0 ? 0.25 : 1, padding: 2, display: 'flex' }}
+                    >
+                      <ChevronUp size={16} aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => move(i, 1)}
+                      disabled={i === goals.length - 1}
+                      aria-label={`Move ${g.title} down`}
+                      style={{ background: 'none', border: 'none', cursor: i === goals.length - 1 ? 'default' : 'pointer', color: 'var(--gd-cream-faint)', opacity: i === goals.length - 1 ? 0.25 : 1, padding: 2, display: 'flex' }}
+                    >
+                      <ChevronDown size={16} aria-hidden="true" />
+                    </button>
+                  </div>
                   {!g.done ? (
                     <button type="button" onClick={() => plant(g.id)} className="gd-btn gd-btn--ghost" style={{ padding: '6px 12px', fontSize: 11 }}>
                       Plant
@@ -123,7 +152,7 @@ export default function SeedsPage() {
         </div>
       </ScreenEnter>
 
-      <GoalEditor open={open} goal={editing} onClose={() => setOpen(false)} />
+      {open ? <SeedEditor goal={editing} onClose={() => setOpen(false)} /> : null}
     </div>
   );
 }

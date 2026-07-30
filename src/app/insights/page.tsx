@@ -2,13 +2,25 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useActiveHabits, useAllCompletions } from '@/features/habits/hooks';
+import { useAppSettings } from '@/features/settings/hooks';
 import { isSatisfied } from '@/features/completions/logic';
 import { useGardenHabits } from '@/features/garden/use-garden';
 import { Plant } from '@/components/garden/plant';
+import { GardenHeatmap } from '@/components/garden/heatmap';
 import { AnimatedNumber, Breathing, ScreenEnter } from '@/components/garden/motion';
+import { todayKey } from '@/lib/dates';
 import type { Habit } from '@/features/habits/schemas';
+import type { Completion } from '@/features/completions/schemas';
 
 const DAY = 86_400_000;
+
+type HistoryRange = '3m' | '6m' | '1y';
+const HISTORY_WEEKS: Record<HistoryRange, number> = { '3m': 13, '6m': 26, '1y': 52 };
+const HISTORY_OPTIONS: { value: HistoryRange; label: string }[] = [
+  { value: '3m', label: '3m' },
+  { value: '6m', label: '6m' },
+  { value: '1y', label: '1y' },
+];
 
 function densityColor(d: number): string {
   return d >= 4
@@ -51,9 +63,21 @@ export default function SeasonPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [historyRange, setHistoryRange] = useState<HistoryRange>('3m');
   const habits = useActiveHabits();
   const all = useAllCompletions();
   const garden = useGardenHabits();
+  const settings = useAppSettings();
+
+  const byHabit = useMemo(() => {
+    const map = new Map<string, Completion[]>();
+    for (const c of all ?? []) {
+      const list = map.get(c.habitId) ?? [];
+      list.push(c);
+      map.set(c.habitId, list);
+    }
+    return map;
+  }, [all]);
 
   const density = useMemo(() => {
     if (!habits || all === undefined) return null;
@@ -125,6 +149,51 @@ export default function SeasonPage() {
                   <AnimatedNumber value={tallest.current} /> {tallest.current === 1 ? 'day' : 'days'} · longest {tallest.best}
                 </div>
               </div>
+            </div>
+          </div>
+        ) : null}
+
+        {garden.length > 0 ? (
+          <div style={{ marginTop: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <div className="gd-eyebrow">Each plot over time</div>
+              <div style={{ display: 'flex', gap: 4 }} role="group" aria-label="History range">
+                {HISTORY_OPTIONS.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => setHistoryRange(o.value)}
+                    aria-pressed={historyRange === o.value}
+                    className="gd-chip"
+                    style={{ padding: '4px 12px', fontSize: 11 }}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginTop: 10 }}>
+              {garden.map((g) => (
+                <div key={g.habit.id} className="gd-card" style={{ marginBottom: 8, padding: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                    <Plant stage={g.stage} color={g.colorVar} size={28} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 15, lineHeight: 1.2 }}>{g.habit.name}</div>
+                      <div className="gd-eyebrow" style={{ marginTop: 2 }}>
+                        {g.current} current · {g.best} best
+                      </div>
+                    </div>
+                  </div>
+                  <GardenHeatmap
+                    habit={g.habit}
+                    completions={byHabit.get(g.habit.id) ?? []}
+                    color={g.colorVar}
+                    today={todayKey(new Date())}
+                    weeks={HISTORY_WEEKS[historyRange]}
+                    weekStartsOn={settings.weekStartsOn}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         ) : null}
