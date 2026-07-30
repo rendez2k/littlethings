@@ -2,12 +2,15 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useHabit, useCompletionsForHabit } from '@/features/habits/hooks';
+import { useParams, useRouter } from 'next/navigation';
+import { getCompletionService, getHabitService, useHabit, useCompletionsForHabit } from '@/features/habits/hooks';
 import { useAppSettings } from '@/features/settings/hooks';
+import { syncLocalNotifications } from '@/features/reminders/local-sync';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { computeStreak } from '@/features/streaks/streak';
 import { isSatisfied } from '@/features/completions/logic';
 import { Plant, GrowthThread } from '@/components/garden/plant';
+import { GardenMonth } from '@/components/garden/month';
 import { FireflyField, AnimatedNumber, ScreenEnter } from '@/components/garden/motion';
 import { gardenColorVar, stageFromStreak } from '@/components/garden/mapping';
 import type { Habit } from '@/features/habits/schemas';
@@ -59,12 +62,47 @@ function StatCard({ label, value, suffix, color }: { label: string; value: React
 export default function PlantDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? null;
+  const router = useRouter();
+  const confirm = useConfirm();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const habit = useHabit(id);
   const completions = useCompletionsForHabit(id);
   const settings = useAppSettings();
+
+  const toggleDay = (date: string, kept: boolean) => {
+    if (!id) return;
+    if (kept) void getCompletionService().clear(id, date);
+    else void getCompletionService().complete(id, date);
+  };
+  const deletePlant = async () => {
+    if (!id || !habit) return;
+    const ok = await confirm({
+      title: `Pull up “${habit.name}”?`,
+      description: 'This removes the plant and its whole history from this device. It can’t be undone.',
+      confirmLabel: 'Pull it up',
+      destructive: true,
+    });
+    if (!ok) return;
+    await getHabitService().softDelete(id);
+    router.push('/habits');
+  };
+  const togglePause = async () => {
+    if (!id || !habit) return;
+    if (habit.status === 'paused') await getHabitService().resume(id);
+    else await getHabitService().pause(id);
+    void syncLocalNotifications();
+  };
+  const toggleArchive = async () => {
+    if (!id || !habit) return;
+    if (habit.status === 'archived') await getHabitService().unarchive(id);
+    else {
+      await getHabitService().archive(id);
+      router.push('/habits');
+    }
+    void syncLocalNotifications();
+  };
 
   const derived = useMemo(() => {
     if (!habit || completions === undefined) return null;
@@ -109,9 +147,14 @@ export default function PlantDetailPage() {
 
   return (
     <div style={{ padding: '54px 22px 24px' }}>
-      <Link href="/habits" className="gd-eyebrow" style={{ display: 'inline-block', marginBottom: 8, textDecoration: 'none', letterSpacing: '0.2em' }}>
-        ‹ All plants
-      </Link>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <Link href="/habits" className="gd-eyebrow" style={{ textDecoration: 'none', letterSpacing: '0.2em' }}>
+          ‹ All plants
+        </Link>
+        <Link href={`/plant?id=${habit.id}`} className="gd-eyebrow gd-eyebrow--accent" style={{ textDecoration: 'none' }}>
+          Edit
+        </Link>
+      </div>
 
       <ScreenEnter stagger={50}>
         <div
@@ -159,6 +202,28 @@ export default function PlantDetailPage() {
 
         <div className="gd-card gd-card--accent" style={{ marginTop: 18, padding: '16px 18px' }}>
           <div className="gd-quote">&ldquo;{pullQuote(streak.current)}&rdquo;</div>
+        </div>
+
+        <div style={{ marginTop: 22 }}>
+          <div className="gd-eyebrow">Fix a day</div>
+          <div className="gd-card" style={{ marginTop: 10, padding: 16 }}>
+            <GardenMonth habit={habit} completions={completions ?? []} color={color} weekStartsOn={settings.weekStartsOn} onToggle={toggleDay} />
+          </div>
+        </div>
+
+        <div style={{ marginTop: 18, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Link href={`/plant?id=${habit.id}`} className="gd-btn gd-btn--ghost" style={{ textDecoration: 'none', flex: '1 1 auto', textAlign: 'center' }}>
+            Edit
+          </Link>
+          <button type="button" onClick={togglePause} className="gd-btn gd-btn--ghost" style={{ flex: '1 1 auto' }}>
+            {habit.status === 'paused' ? 'Resume' : 'Pause'}
+          </button>
+          <button type="button" onClick={toggleArchive} className="gd-btn gd-btn--ghost" style={{ flex: '1 1 auto' }}>
+            {habit.status === 'archived' ? 'Unarchive' : 'Archive'}
+          </button>
+          <button type="button" onClick={deletePlant} className="gd-btn gd-btn--ghost" style={{ flex: '1 1 auto', color: 'var(--gd-danger)' }}>
+            Pull up
+          </button>
         </div>
       </ScreenEnter>
     </div>
