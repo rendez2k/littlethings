@@ -108,6 +108,51 @@ body {
   background-image: radial-gradient(ellipse at 50% 0%, var(--gd-bg-glow) 0%, var(--gd-bg) 60%);
 }
 
+/* The desktop wordmark is hidden on phones (the app is full-bleed there). */
+.gd-shell-mark { display: none; }
+
+/* ---- Desktop: present the app as a framed "device" on a dusk backdrop ---- */
+/* On phones the app is full-bleed; on wider screens the mobile-first column
+   would otherwise strand in a void, so we centre it as a bordered, elevated
+   panel over a richer garden backdrop. The frame uses `transform` to become a
+   containing block, so in-app sheets/dialogs (which are position:fixed) stay
+   within the panel instead of spanning the whole monitor. */
+@media (min-width: 820px) {
+  .gd-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background-image:
+      radial-gradient(72% 55% at 50% -6%, var(--gd-bg-glow) 0%, transparent 60%),
+      radial-gradient(46% 46% at 88% 112%, oklch(0.27 0.06 150 / 0.55) 0%, transparent 70%),
+      radial-gradient(48% 48% at 10% 110%, oklch(0.26 0.05 90 / 0.4) 0%, transparent 72%),
+      radial-gradient(ellipse at 50% 42%, var(--gd-bg-soft) 0%, var(--gd-bg) 62%);
+  }
+  .gd-shell-frame {
+    height: 100%;
+    max-height: 920px;
+    border: 1px solid var(--gd-hair-strong);
+    border-radius: 38px;
+    overflow: hidden;
+    background-color: var(--gd-bg);
+    background-image: radial-gradient(ellipse at 50% 0%, var(--gd-bg-glow) 0%, var(--gd-bg) 60%);
+    box-shadow:
+      0 50px 110px -34px rgba(0, 0, 0, 0.78),
+      0 0 0 1px oklch(1 0 0 / 0.03) inset;
+    transform: translateZ(0);
+  }
+  /* The little wordmark that anchors the composition above the panel. */
+  .gd-shell-mark {
+    display: block;
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+}
+
 /* ---- Semantic type ---- */
 .gd-eyebrow {
   font-family: var(--gd-font-mono);
