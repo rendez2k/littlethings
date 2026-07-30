@@ -12,10 +12,17 @@ export function SettingsSection({
 }) {
   return (
     <section className={cn('mb-6', className)}>
-      <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
+      <h2 className="gd-eyebrow" style={{ marginBottom: 10, paddingLeft: 2 }}>
         {title}
       </h2>
-      <div className="divide-y divide-border overflow-hidden rounded-card border border-border bg-surface">
+      <div
+        className="divide-y divide-border overflow-hidden"
+        style={{
+          borderRadius: 18,
+          border: '1px solid var(--gd-hair)',
+          background: 'var(--gd-bg-soft)',
+        }}
+      >
         {children}
       </div>
     </section>
