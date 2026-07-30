@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { GardenTabBar } from '@/components/garden/tab-bar';
+import { ShellFireflies } from '@/components/layout/shell-fireflies';
 import { OfflineIndicator } from '@/components/layout/offline-indicator';
 import { Onboarding } from '@/components/onboarding/onboarding';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
@@ -21,6 +22,7 @@ import { ScrollReset } from '@/components/layout/scroll-reset';
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="gd-atmos gd-shell fixed inset-0 overflow-hidden">
+      <ShellFireflies />
       <div className="gd-shell-mark gd-eyebrow" aria-hidden="true">
         Little Things · a garden
       </div>

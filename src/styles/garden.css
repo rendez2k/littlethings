@@ -111,6 +111,22 @@ body {
 /* The desktop wordmark is hidden on phones (the app is full-bleed there). */
 .gd-shell-mark { display: none; }
 
+/* Ambient desktop fireflies, drifting in the dusk margins behind the frame. */
+.gd-shell-flies {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.gd-shell-flies span {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--gd-gold);
+  box-shadow: 0 0 10px var(--gd-gold), 0 0 4px var(--gd-gold);
+  opacity: 0.6;
+}
+
 /* ---- Desktop: present the app as a framed "device" on a dusk backdrop ---- */
 /* On phones the app is full-bleed; on wider screens the mobile-first column
    would otherwise strand in a void, so we centre it as a bordered, elevated
@@ -132,6 +148,7 @@ body {
   .gd-shell-frame {
     height: 100%;
     max-height: 920px;
+    max-width: 37rem;
     border: 1px solid var(--gd-hair-strong);
     border-radius: 38px;
     overflow: hidden;
