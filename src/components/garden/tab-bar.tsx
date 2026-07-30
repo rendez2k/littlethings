@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 interface Tab {
   href: string;
   label: string;
-  key: 'garden' | 'plants' | 'seeds' | 'season';
+  key: 'garden' | 'plants' | 'seeds' | 'season' | 'shed';
 }
 
 const TABS: Tab[] = [
@@ -14,6 +14,7 @@ const TABS: Tab[] = [
   { href: '/habits', label: 'Plants', key: 'plants' },
   { href: '/goals', label: 'Seeds', key: 'seeds' },
   { href: '/insights', label: 'Season', key: 'season' },
+  { href: '/settings', label: 'Shed', key: 'shed' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -45,6 +46,14 @@ function TabIcon({ tab, on }: { tab: Tab['key']; on: boolean }) {
       <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
         <ellipse cx="12" cy="12" rx="4" ry="6" {...p} />
         <path d="M12 6 L12 18" stroke={c} strokeWidth="1.4" opacity="0.5" />
+      </svg>
+    );
+  if (tab === 'shed')
+    return (
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 11 L12 5 L20 11" {...p} />
+        <path d="M6 11 L6 20 L18 20 L18 11" {...p} />
+        <path d="M11 20 L11 15" {...p} />
       </svg>
     );
   return (

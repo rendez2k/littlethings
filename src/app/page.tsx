@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Settings2 } from 'lucide-react';
 import { getCompletionService } from '@/features/habits/hooks';
 import { useGardenToday, type GardenEntry } from '@/features/garden/use-garden';
 import { PlantAnimated, FireflyField, AnimatedNumber, ScreenEnter } from '@/components/garden/motion';
@@ -145,13 +144,8 @@ export default function TodayPage() {
               Your <em>garden</em>
             </h1>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <Link href="/settings" aria-label="Settings" style={{ color: 'var(--gd-cream-faint)', display: 'flex' }}>
-              <Settings2 size={18} aria-hidden="true" />
-            </Link>
-            <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: 'var(--gd-bloom)' }}>
-              <AnimatedNumber value={doneCount} />/{total}
-            </div>
+          <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: 'var(--gd-bloom)' }}>
+            <AnimatedNumber value={doneCount} />/{total}
           </div>
         </div>
 

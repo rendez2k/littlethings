@@ -38,7 +38,7 @@ export default function SettingsPage() {
   const isNative = useIsNativeApp();
   return (
     <>
-      <PageHeader title="Settings" backHref="/" backLabel="Garden" />
+      <PageHeader title="The shed" subtitle="Your tools and preferences." />
 
       <AppearanceSettings />
       <HabitSettings />
