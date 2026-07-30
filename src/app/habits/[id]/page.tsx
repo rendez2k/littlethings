@@ -12,7 +12,7 @@ import { isSatisfied } from '@/features/completions/logic';
 import { Plant, GrowthThread } from '@/components/garden/plant';
 import { GardenMonth } from '@/components/garden/month';
 import { FireflyField, AnimatedNumber, ScreenEnter } from '@/components/garden/motion';
-import { gardenColorVar, stageFromStreak } from '@/components/garden/mapping';
+import { gardenColor, gardenColorVar, stageFromStreak } from '@/components/garden/mapping';
 import type { Habit } from '@/features/habits/schemas';
 import type { Completion } from '@/features/completions/schemas';
 
@@ -122,6 +122,7 @@ export default function PlantDetailPage() {
       stage,
       planted,
       color: gardenColorVar(habit.color),
+      species: gardenColor(habit.color),
       growth: weeklyGrowth(completions, habit, now),
       monthKept: keptThisMonth.size,
       monthElapsed: now.getDate(),
@@ -140,7 +141,7 @@ export default function PlantDetailPage() {
     );
   }
 
-  const { streak, stage, planted, color, growth, monthKept, monthElapsed } = derived;
+  const { streak, stage, planted, color, species, growth, monthKept, monthElapsed } = derived;
   const words = habit.name.split(' ');
   const lead = words.slice(0, -1).join(' ');
   const last = words[words.length - 1];
@@ -172,7 +173,7 @@ export default function PlantDetailPage() {
         >
           <FireflyField count={5} />
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <Plant stage={stage} color={color} size={160} />
+            <Plant stage={stage} color={color} species={species} size={160} />
           </div>
           <div className="gd-soil" style={{ width: '80%', marginTop: 4 }} />
         </div>
@@ -196,7 +197,7 @@ export default function PlantDetailPage() {
         <div style={{ marginTop: 22 }}>
           <div className="gd-eyebrow">Growth</div>
           <div className="gd-card" style={{ marginTop: 10, padding: '18px 14px' }}>
-            <GrowthThread stages={growth} color={color} labels={['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7']} />
+            <GrowthThread stages={growth} color={color} species={species} labels={['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7']} />
           </div>
         </div>
 

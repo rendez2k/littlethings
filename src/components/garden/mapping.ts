@@ -3,10 +3,30 @@
  * redesign is a pure reskin over the real Dexie data — no schema change.
  */
 import type { HabitColor } from '@/features/habits/schemas';
+import type { WidgetColor } from '@/features/widget/contract';
 
 /** The five garden accents, as CSS custom-property references. */
 export type GardenColor = 'moss' | 'bloom' | 'sky' | 'gold' | 'plum';
 export const gardenVar = (c: GardenColor): string => `var(--gd-${c})`;
+
+/**
+ * The five garden accents as widget-ready hex, converted from the `--gd-*`
+ * oklch tokens. `light` is a slightly deeper variant for a light home-screen
+ * background; `dark` is the on-canvas garden colour. The native widget picks
+ * one by its own appearance, so the home-screen card matches the app.
+ */
+export const GARDEN_HEX: Record<GardenColor, WidgetColor> = {
+  moss: { light: '#38853e', dark: '#479c4d' },
+  bloom: { light: '#d86353', dark: '#f47c6b' },
+  sky: { light: '#0091b5', dark: '#00aacf' },
+  gold: { light: '#c28f00', dark: '#e3ae28' },
+  plum: { light: '#ab68ba', dark: '#c480d4' },
+};
+
+/** A habit colour resolved to the garden hex the app now shows it in. */
+export function gardenWidgetColor(habitColor: string): WidgetColor {
+  return GARDEN_HEX[gardenColor(habitColor)];
+}
 
 /** Map the app's ten habit colours onto the five botanical accents. */
 const HABIT_TO_GARDEN: Record<HabitColor, GardenColor> = {

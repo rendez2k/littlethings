@@ -39,7 +39,8 @@ describe('buildWidgetSnapshot', () => {
       done: true,
       partial: false,
       ratio: 1,
-      colorHex: { light: '#6355c9', dark: '#b7adfb' },
+      // 'lavender' maps to the garden plum accent.
+      colorHex: { light: '#ab68ba', dark: '#c480d4' },
     });
     expect(s.habits[1]).toMatchObject({ id: 'b', name: 'Read', done: false, ratio: 0 });
   });
@@ -60,7 +61,8 @@ describe('buildWidgetSnapshot', () => {
     const h = s.habits[0]!;
     expect(h.partial).toBe(true);
     expect(h.ratio).toBe(0.75);
-    expect(h.colorHex).toEqual({ light: '#2a72c4', dark: '#7cb8f2' });
+    // 'sky' maps to the garden sky accent.
+    expect(h.colorHex).toEqual({ light: '#0091b5', dark: '#00aacf' });
   });
 
   it('falls back to a default colour for an unknown key', () => {
@@ -69,7 +71,8 @@ describe('buildWidgetSnapshot', () => {
       entries: [{ habit: habit('d', 'X', 'not-a-colour'), completion: undefined, status: 'pending' }],
     };
     const s = buildWidgetSnapshot(oddView, '2026-07-23', 'now', ACCENT);
-    expect(s.habits[0]!.colorHex).toEqual({ light: '#6355c9', dark: '#b7adfb' });
+    // An unknown colour falls back to moss.
+    expect(s.habits[0]!.colorHex).toEqual({ light: '#38853e', dark: '#479c4d' });
   });
 
   it('caps the habit list for a compact widget', () => {

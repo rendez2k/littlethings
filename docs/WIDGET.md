@@ -56,11 +56,11 @@ it later.
   "schema": 2,
   "date": "2026-07-28",
   "completed": 2, "total": 4, "ratio": 0.5,
-  "accent": { "light": "#6355c9", "dark": "#b7adfb" },   // selected palette — use for the ring
+  "accent": { "light": "#38853e", "dark": "#479c4d" },   // garden moss — use for the ring
   "habits": [
     {
       "id": "…", "name": "Water", "icon": "droplet", "color": "sky",
-      "colorHex": { "light": "#2a72c4", "dark": "#7cb8f2" }, // exact app colour, per appearance
+      "colorHex": { "light": "#0091b5", "dark": "#00aacf" }, // garden accent for this plant, per appearance
       "ratio": 0.75,        // progress toward today's target (1 = done)
       "done": false, "partial": true
     }
@@ -69,9 +69,12 @@ it later.
 }
 ```
 
-Every colour is sent as **both** a light and a dark hex so the widget matches the
-app precisely and still adapts to its own appearance — the native side picks
-`light`/`dark` by its environment and never needs its own palette.
+Every colour is the app's **garden** palette (moss ring; each plant tinted with
+its garden accent — moss / bloom / sky / gold / plum), sent as **both** a light
+and a dark hex so the widget matches the app and still adapts to its own
+appearance — the native side picks `light`/`dark` by its environment and never
+needs its own palette. Source of truth: `GARDEN_HEX` in
+`src/components/garden/mapping.ts`.
 
 ### Card the shell should draw (calm, app-matching)
 
