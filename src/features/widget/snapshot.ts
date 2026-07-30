@@ -5,15 +5,8 @@
 
 import type { DayView } from '@/features/completions/day-view';
 import { targetProgress } from '@/features/completions/logic';
-import { HABIT_COLOR_VALUES } from '@/features/habits/colors';
-import type { HabitColor } from '@/features/habits/schemas';
+import { gardenWidgetColor } from '@/components/garden/mapping';
 import { type WidgetColor, type WidgetSnapshot, WIDGET_MAX_HABITS } from './contract';
-
-/** A habit colour key resolved to light/dark hex, defaulting gracefully. */
-function colorHexFor(color: string): WidgetColor {
-  const v = HABIT_COLOR_VALUES[color as HabitColor] ?? HABIT_COLOR_VALUES.lavender;
-  return { light: v.light, dark: v.dark };
-}
 
 export function buildWidgetSnapshot(
   view: DayView,
@@ -42,7 +35,7 @@ export function buildWidgetSnapshot(
         name: entry.habit.name,
         icon: entry.habit.icon,
         color: entry.habit.color,
-        colorHex: colorHexFor(entry.habit.color),
+        colorHex: gardenWidgetColor(entry.habit.color),
         ratio,
         done: entry.status === 'complete',
         partial: entry.status === 'partial',

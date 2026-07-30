@@ -12,6 +12,14 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.3.1',
+    date: 'Five kinds of plant',
+    items: [
+      'Your plants now grow into distinct species by colour — a fern, a poppy, a bluebell, a daisy and a spike of lavender — each unfurling its own shape as its streak lengthens. 🌸',
+      'The home-screen widget wears the garden too: a moss progress ring and each plant tinted in its garden colour.',
+    ],
+  },
+  {
     version: '0.3.0',
     date: 'A whole new garden',
     items: [
