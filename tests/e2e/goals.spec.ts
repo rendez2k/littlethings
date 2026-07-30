@@ -1,21 +1,21 @@
 import { expect, test } from './fixtures';
 
-test('add a bucket-list goal and mark it done', async ({ page }) => {
+test('plant a seed (goal) and sprout it', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('link', { name: 'Goals' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Goals' })).toBeVisible();
-  await expect(page.getByText('Dream a little')).toBeVisible();
+  await page.getByRole('link', { name: 'Seeds' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Seed packet' })).toBeVisible();
+  await expect(page.getByText(/No seeds yet/)).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add a goal' }).click();
+  await page.getByRole('button', { name: 'Add seed' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
-  await page.getByLabel('Goal', { exact: true }).fill('Visit Japan');
+  await page.getByLabel('Name it').fill('Visit Japan');
   // The icon is suggested from the title ("Visit Japan" → plane).
-  await expect(page.getByRole('radio', { name: 'plane' })).toBeChecked();
-  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('button', { name: 'plane' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Add to the packet' }).click();
 
   await expect(page.getByText('Visit Japan')).toBeVisible();
 
-  // Mark done → moves to the Done section.
-  await page.getByRole('checkbox', { name: 'Mark Visit Japan done' }).click();
-  await expect(page.getByRole('heading', { name: /Done \(1\)/ })).toBeVisible();
+  // Plant it → it sprouts.
+  await page.getByRole('button', { name: 'Plant' }).click();
+  await expect(page.getByText('Sprouted')).toBeVisible();
 });

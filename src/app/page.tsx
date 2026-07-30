@@ -144,7 +144,11 @@ export default function TodayPage() {
               Your <em>garden</em>
             </h1>
           </div>
-          <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: 'var(--gd-bloom)' }}>
+          <div
+            role="img"
+            aria-label={`${doneCount} of ${total} tended`}
+            style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: 'var(--gd-bloom)' }}
+          >
             <AnimatedNumber value={doneCount} />/{total}
           </div>
         </div>

@@ -2,31 +2,32 @@ import { expect, test } from './fixtures';
 
 test('export, reset and re-import restores the data', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Create my first habit' }).click();
-  await page.getByLabel('Name').fill('Meditate');
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('link', { name: 'Plant your first' }).click();
+  await page.getByLabel('Name it').fill('Meditate');
+  await page.getByRole('button', { name: 'Plant', exact: true }).click();
   await expect(page.getByText('Meditate')).toBeVisible();
 
   // Export a backup.
-  await page.getByRole('link', { name: 'Settings' }).click();
+  await page.getByRole('link', { name: 'Shed' }).click();
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export' }).click();
   const download = await downloadPromise;
   const backupPath = await download.path();
 
-  // Reset everything.
+  // Reset everything (navigates back to the empty garden).
   await page.getByRole('button', { name: 'Reset', exact: true }).click();
   await page.getByRole('button', { name: 'Reset everything' }).click();
-  await expect(page.getByRole('heading', { name: 'Build better days.' })).toBeVisible();
+  await expect(page.getByText('Nothing planted yet')).toBeVisible();
 
   // Re-import the backup (merge).
-  await page.getByRole('link', { name: 'Settings' }).click();
+  await page.getByRole('link', { name: 'Shed' }).click();
   await page.getByRole('button', { name: 'Choose a backup file' }).click();
   await page.locator('input[type=file]').setInputFiles(backupPath);
   await expect(page.getByText(/Found 1 habits/)).toBeVisible();
   await page.getByRole('button', { name: 'Merge' }).click();
 
-  // After the reload, the habit is back.
-  await page.getByRole('link', { name: 'Today' }).click();
-  await expect(page.getByText('Meditate')).toBeVisible();
+  // After the reload, the habit is back on Today.
+  await page.waitForTimeout(1200);
+  await page.goto('/');
+  await expect(page.getByText('Meditate').first()).toBeVisible();
 });

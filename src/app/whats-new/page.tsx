@@ -12,6 +12,16 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.3.0',
+    date: 'A whole new garden',
+    items: [
+      'Little Things is now a garden. Every habit is a plant that grows through five stages as your streak builds — seed, sprout, sapling, bush, bloom — on a calm, deep-dusk canvas.',
+      'Tend your plot on Today with a single tap; open a plant for its calendar, growth over the weeks and a gentle note. Counts and durations get a quiet stepper, with skip and undo.',
+      'Your habits, goals, streaks and history all carried straight over — same data, new light. Nothing to migrate.',
+      'The tabs are Garden, Plants, Seeds, Season and the Shed (your settings) — everything you had, in the garden’s voice. 🌱',
+    ],
+  },
+  {
     version: '0.2.27',
     date: 'One-offs that wait for you',
     items: [

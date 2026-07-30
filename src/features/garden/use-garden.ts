@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useActiveHabits, useAllCompletions, useCompletionsForDate } from '@/features/habits/hooks';
+import { useActiveHabits, useArchivedHabits, useAllCompletions, useCompletionsForDate } from '@/features/habits/hooks';
 import { useAppSettings } from '@/features/settings/hooks';
 import { buildDayView, everResolvedHabitIds } from '@/features/completions/day-view';
 import { computeStreak } from '@/features/streaks/streak';
@@ -70,6 +70,21 @@ export function useGardenHabits(): GardenHabit[] | undefined {
     return habits
       .map((h) => enrich(h, byHabit, today, settings.weekStartsOn))
       .sort((a, b) => b.current - a.current);
+  }, [habits, all, settings.weekStartsOn]);
+}
+
+/** Archived ("resting") plants, enriched, most-recent streak first. */
+export function useGardenArchived(): GardenHabit[] | undefined {
+  const habits = useArchivedHabits();
+  const all = useAllCompletions();
+  const settings = useAppSettings();
+  return useMemo(() => {
+    if (!habits) return undefined;
+    const byHabit = completionsByHabit(all);
+    const today = todayKey(new Date());
+    return habits
+      .map((h) => enrich(h, byHabit, today, settings.weekStartsOn))
+      .sort((a, b) => b.best - a.best);
   }, [habits, all, settings.weekStartsOn]);
 }
 

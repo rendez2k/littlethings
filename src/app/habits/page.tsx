@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useGardenHabits, type GardenHabit } from '@/features/garden/use-garden';
+import { useGardenHabits, useGardenArchived, type GardenHabit } from '@/features/garden/use-garden';
 import { Plant } from '@/components/garden/plant';
 import { ScreenEnter } from '@/components/garden/motion';
 import { HABIT_CATEGORIES, habitCategory } from '@/features/habits/categories';
@@ -83,6 +83,7 @@ export default function PlantsPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const habits = useGardenHabits();
+  const archived = useGardenArchived();
 
   // Group into cadence beds (Daily / Weekly / …), preserving the streak sort
   // within each and dropping empty beds.
@@ -113,7 +114,7 @@ export default function PlantsPage() {
         </div>
 
         <div style={{ marginTop: 16 }}>
-          {habits.length === 0 ? (
+          {habits.length === 0 && (!archived || archived.length === 0) ? (
             <div className="gd-card" style={{ marginTop: 8, textAlign: 'center', padding: 24 }}>
               <div className="gd-body-sm">Nothing growing yet. Plant your first seed.</div>
             </div>
@@ -129,6 +130,55 @@ export default function PlantsPage() {
               </section>
             ))
           )}
+
+          {archived && archived.length > 0 ? (
+            <section style={{ marginBottom: 20 }}>
+              <div className="gd-eyebrow" style={{ marginBottom: 8 }}>
+                Resting · {archived.length}
+              </div>
+              {archived.map((h) => (
+                <Link
+                  key={h.habit.id}
+                  href={`/habits/${h.habit.id}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 14,
+                    padding: '12px 14px',
+                    marginBottom: 8,
+                    borderRadius: 16,
+                    background: 'var(--gd-bg-soft)',
+                    border: '1px dashed var(--gd-hair)',
+                    textDecoration: 'none',
+                    color: 'var(--gd-cream)',
+                    opacity: 0.6,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 12,
+                      flexShrink: 0,
+                      background: 'var(--gd-bg-soft-2)',
+                      border: '1px solid var(--gd-hair)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Plant stage={0} color={h.colorVar} size={44} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 17, lineHeight: 1.2 }}>{h.habit.name}</div>
+                    <div className="gd-eyebrow" style={{ marginTop: 3 }}>
+                      Resting · tap to wake
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </section>
+          ) : null}
         </div>
       </ScreenEnter>
     </div>
