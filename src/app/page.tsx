@@ -13,7 +13,7 @@ import { TodayHabitCard } from '@/components/today/today-habit-card';
 import { useHabitEditor } from '@/components/habits/habit-editor-provider';
 import { useActiveHabits, useAllCompletions, useCompletionsForDate } from '@/features/habits/hooks';
 import { useAppSettings } from '@/features/settings/hooks';
-import { buildDayView } from '@/features/completions/day-view';
+import { buildDayView, everResolvedHabitIds } from '@/features/completions/day-view';
 import { useTodayWidgetSync } from '@/features/widget/use-widget-sync';
 import { computeStreak, type StreakResult } from '@/features/streaks/streak';
 import type { Completion } from '@/features/completions/schemas';
@@ -57,14 +57,12 @@ export default function TodayPage() {
     return grouped;
   }, [allCompletions]);
 
-  // Habit ids completed at least once — lets one-offs linger on today until done.
-  const everCompletedHabitIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const c of allCompletions ?? []) {
-      if (!c.deletedAt) ids.add(c.habitId);
-    }
-    return ids;
-  }, [allCompletions]);
+  // Habit ids resolved (completed or skipped) at least once — lets a one-off
+  // linger on today until it's actually done, not merely touched.
+  const everCompletedHabitIds = useMemo(
+    () => everResolvedHabitIds(habits ?? [], allCompletions ?? []),
+    [habits, allCompletions],
+  );
 
   // Mirror today's progress to the native home-screen widget (no-op on web).
   useTodayWidgetSync(habits, completionsForDate, selectedDate, today, everCompletedHabitIds);

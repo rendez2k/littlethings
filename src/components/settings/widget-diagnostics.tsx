@@ -5,7 +5,7 @@ import { Capacitor } from '@capacitor/core';
 import { Button } from '@/components/ui/button';
 import { SettingsRow, SettingsSection } from './settings-section';
 import { useActiveHabits, useAllCompletions, useCompletionsForDate } from '@/features/habits/hooks';
-import { buildDayView } from '@/features/completions/day-view';
+import { buildDayView, everResolvedHabitIds } from '@/features/completions/day-view';
 import { buildWidgetSnapshot } from '@/features/widget/snapshot';
 import { currentWidgetAccent } from '@/features/widget/accent';
 import { pushWidgetSnapshotResult } from '@/features/widget/bridge';
@@ -45,8 +45,7 @@ export function WidgetDiagnostics() {
     setBusy(true);
     setMessage(null);
     try {
-      const ever = new Set<string>();
-      for (const c of allCompletions ?? []) if (!c.deletedAt) ever.add(c.habitId);
+      const ever = everResolvedHabitIds(habits ?? [], allCompletions ?? []);
       const view = buildDayView(habits ?? [], completionsForDate ?? [], today, today, ever);
       const snapshot = buildWidgetSnapshot(view, today, new Date().toISOString(), currentWidgetAccent());
       const result = await pushWidgetSnapshotResult(snapshot);

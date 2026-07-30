@@ -12,6 +12,13 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: '0.2.27',
+    date: 'One-offs that wait for you',
+    items: [
+      'Fixed a one-off you’d started but not finished vanishing from Today. A one-off now stays on Today until you actually complete it (or skip it) — half-done no longer counts as done.',
+    ],
+  },
+  {
     version: '0.2.26',
     date: 'Even more little emoji',
     items: [

@@ -12,7 +12,7 @@
 import { createHabitRepository } from '@/features/habits/repository';
 import { createCompletionRepository } from '@/features/completions/repository';
 import { getCompletionService } from '@/features/habits/hooks';
-import { buildDayView } from '@/features/completions/day-view';
+import { buildDayView, everResolvedHabitIds } from '@/features/completions/day-view';
 import { todayKey } from '@/lib/dates';
 import { buildWidgetSnapshot } from './snapshot';
 import { currentWidgetAccent } from './accent';
@@ -52,10 +52,9 @@ export async function pushTodayWidgetSnapshot(): Promise<void> {
   const completions = createCompletionRepository();
   const [forDate, all] = await Promise.all([completions.getByDate(today), completions.getAll()]);
 
-  // Habit ids completed at least once (getAll already excludes tombstones) — so
-  // lingering one-offs match the Today screen's view exactly.
-  const everCompleted = new Set<string>();
-  for (const c of all) everCompleted.add(c.habitId);
+  // Resolved (completed or skipped) ids, so lingering one-offs match the Today
+  // screen exactly — a partially-done one-off stays visible.
+  const everCompleted = everResolvedHabitIds(habits, all);
 
   const view = buildDayView(habits, forDate, today, today, everCompleted);
   await pushWidgetSnapshot(
