@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildDayView } from '@/features/completions/day-view';
+import { buildDayView, everResolvedHabitIds } from '@/features/completions/day-view';
 import { makeHabit, makeCompletion } from '../factories';
 
 const TODAY = '2024-05-15'; // Wednesday
@@ -77,6 +77,49 @@ describe('buildDayView', () => {
       const past = '2024-05-12';
       const view = buildDayView([oneOff], [], past, TODAY, new Set());
       expect(view.entries).toHaveLength(0);
+    });
+
+    it('keeps a partially-done one-off on today (partial ≠ resolved)', () => {
+      const countOnce = makeHabit({
+        startDate: '2024-05-10',
+        schedule: { type: 'once' },
+        target: { type: 'count', amount: 5, unit: 'pages' },
+      });
+      // 2 of 5 on an earlier day — not resolved, so it must still appear today.
+      const earlier = makeCompletion(countOnce.id, '2024-05-10', { state: 'complete', value: 2 });
+      const resolved = everResolvedHabitIds([countOnce], [earlier]);
+      expect(resolved.has(countOnce.id)).toBe(false);
+      const view = buildDayView([countOnce], [], TODAY, TODAY, resolved);
+      expect(view.entries.map((e) => e.habit.id)).toEqual([countOnce.id]);
+      expect(view.entries[0]!.status).toBe('pending');
+    });
+  });
+
+  describe('everResolvedHabitIds', () => {
+    const h = makeHabit({ target: { type: 'count', amount: 5, unit: 'pages' } });
+
+    it('counts a met target as resolved', () => {
+      const done = makeCompletion(h.id, TODAY, { state: 'complete', value: 5 });
+      expect(everResolvedHabitIds([h], [done]).has(h.id)).toBe(true);
+    });
+
+    it('counts a skip as resolved', () => {
+      const skip = makeCompletion(h.id, TODAY, { state: 'skipped', value: 0 });
+      expect(everResolvedHabitIds([h], [skip]).has(h.id)).toBe(true);
+    });
+
+    it('does not count partial progress as resolved', () => {
+      const partial = makeCompletion(h.id, TODAY, { state: 'complete', value: 2 });
+      expect(everResolvedHabitIds([h], [partial]).has(h.id)).toBe(false);
+    });
+
+    it('ignores tombstoned completions', () => {
+      const deleted = makeCompletion(h.id, TODAY, {
+        state: 'complete',
+        value: 5,
+        deletedAt: '2024-05-15T00:00:00.000Z',
+      });
+      expect(everResolvedHabitIds([h], [deleted]).has(h.id)).toBe(false);
     });
   });
 });

@@ -9,6 +9,27 @@ import { isPausedOn, isScheduledOn, isWithinRange } from '@/features/habits/sche
 import { deriveDayStatus, isSatisfied, type DayStatus } from './logic';
 import type { Completion } from './schemas';
 
+/**
+ * Habit ids that have been *resolved* at least once — the target was met on some
+ * day, or the day was skipped. This is what tells a one-off it's finished, so it
+ * can stop lingering on today. Partial progress does NOT count as resolved, so a
+ * half-done one-off stays visible until you actually complete (or skip) it.
+ */
+export function everResolvedHabitIds(
+  habits: Habit[],
+  completions: Completion[],
+): ReadonlySet<string> {
+  const byId = new Map(habits.map((h) => [h.id, h]));
+  const ids = new Set<string>();
+  for (const c of completions) {
+    if (c.deletedAt) continue;
+    const habit = byId.get(c.habitId);
+    if (!habit) continue;
+    if (c.state === 'skipped' || isSatisfied(habit.target, c.value)) ids.add(c.habitId);
+  }
+  return ids;
+}
+
 export interface DayEntry {
   habit: Habit;
   completion: Completion | undefined;
@@ -41,10 +62,11 @@ export function buildDayView(
   date: DateKey,
   today: DateKey,
   /**
-   * Habit ids with at least one completion ever. Used to keep a one-off visible
-   * on today until it's done: a `once` habit is only "scheduled" on its start
+   * Habit ids that have been *resolved* (completed to target or skipped) at least
+   * once — see `everResolvedHabitIds`. Used to keep a one-off visible on today
+   * until it's actually done: a `once` habit is only "scheduled" on its start
    * date, but should linger on today so you can get to it, then drop off once
-   * completed. Omit to keep the plain scheduled view.
+   * resolved. Partial progress does not resolve it. Omit for the plain view.
    */
   everCompletedHabitIds?: ReadonlySet<string>,
 ): DayView {
