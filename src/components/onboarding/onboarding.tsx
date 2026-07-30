@@ -1,131 +1,152 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import * as Dialog from '@radix-ui/react-dialog';
-import { CloudOff, HeartHandshake, Sparkles, Wand2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { getSettingsRepository } from '@/features/settings/hooks';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Plant } from '@/components/garden/plant';
+import { FireflyField } from '@/components/garden/motion';
 import { isScreenshotMode, applyScreenshotMode } from '@/lib/screenshot-mode';
 
 const ONBOARDED_KEY = 'little-things.onboarded.v1';
 
-const POINTS = [
+interface Slide {
+  eyebrow: string;
+  plant: number;
+  title: ReactNode;
+  body: string;
+  cta: string;
+}
+
+const SLIDES: Slide[] = [
   {
-    icon: CloudOff,
-    title: 'Private & offline 🔒',
-    text: 'Everything stays on your device. No account, no tracking.',
+    eyebrow: 'Little Things · a garden',
+    plant: 4,
+    title: (
+      <>
+        Plant a habit.
+        <br />
+        <em style={{ color: 'var(--gd-bloom)' }}>Watch it grow.</em>
+      </>
+    ),
+    body: 'Each habit is a plant. Show up, it grows. Miss a day, it wilts a little — but it forgives.',
+    cta: 'Continue',
   },
   {
-    icon: Wand2,
-    title: 'Simple to start 🌱',
-    text: 'Add your first habit in seconds, from a template or your own.',
+    eyebrow: 'How it works',
+    plant: 2,
+    title: (
+      <>
+        A <em>quiet</em> ritual.
+      </>
+    ),
+    body: 'Open the app once a day. Tap a plant when you tend it. That’s the whole ritual.',
+    cta: 'Continue',
   },
   {
-    icon: HeartHandshake,
-    title: 'Gentle by design 🤍',
-    text: 'Streaks encourage you — a missed day is never a failure.',
+    eyebrow: 'Ready',
+    plant: 0,
+    title: (
+      <>
+        Plant your <em style={{ color: 'var(--gd-gold)' }}>first seed</em>.
+      </>
+    ),
+    body: 'Start with something small enough that "tomorrow" isn’t a good excuse.',
+    cta: 'Plant your first  ›',
   },
 ];
 
-/**
- * A single, skippable welcome shown once on first launch (brief §7.1 — not a
- * multi-page carousel). Reads/writes a localStorage flag so it never repeats.
- */
+/** First-run garden intro. Full-screen overlay gated on a localStorage flag. */
 export function Onboarding() {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
+  const [slide, setSlide] = useState(0);
 
   useEffect(() => {
     try {
-      // LaunchKit store-screenshot mode (?lkshot=1): skip the welcome sheet and
-      // seed sample data so captures show a populated app, not onboarding.
       if (isScreenshotMode()) {
         void applyScreenshotMode();
         return;
       }
       if (!localStorage.getItem(ONBOARDED_KEY)) setOpen(true);
     } catch {
-      // Ignore storage errors; simply don't show onboarding.
+      /* ignore storage errors */
     }
   }, []);
 
-  const dismiss = () => {
-    const trimmed = name.trim().slice(0, 40);
-    if (trimmed) {
-      // Save the name for gentle personalisation (best-effort).
-      getSettingsRepository()
-        .update({ displayName: trimmed })
-        .catch(() => {});
-    }
+  if (!open) return null;
+
+  const s = SLIDES[slide]!;
+  const finish = () => {
     try {
       localStorage.setItem(ONBOARDED_KEY, '1');
     } catch {
-      // no-op
+      /* no-op */
     }
     setOpen(false);
   };
+  const next = () => {
+    if (slide === SLIDES.length - 1) finish();
+    else setSlide((n) => n + 1);
+  };
 
   return (
-    <Dialog.Root open={open} onOpenChange={(o) => (!o ? dismiss() : undefined)}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm data-[state=open]:animate-fade-in" />
-        <Dialog.Content
-          // Don't auto-focus the name field on open — on mobile that forces the
-          // keyboard open over the welcome screen. The field stays optional.
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed inset-x-0 bottom-0 z-[70] mx-auto max-w-app rounded-t-sheet border border-border bg-elevated p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-sheet data-[state=open]:animate-sheet-in"
-        >
-          <div className="mb-5 flex flex-col items-center text-center">
-            <span className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-primary text-primary-foreground shadow-card">
-              <Sparkles className="h-8 w-8" aria-hidden="true" />
-            </span>
-            <Dialog.Title className="text-xl font-bold tracking-tight text-text">
-              Welcome to Little Things
-            </Dialog.Title>
-            <Dialog.Description className="mt-1 text-sm text-muted">
-              A calm way to build better days.
-            </Dialog.Description>
-          </div>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Welcome to Little Things"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 80,
+        padding: 'calc(60px + env(safe-area-inset-top)) 32px calc(32px + env(safe-area-inset-bottom))',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        background: 'radial-gradient(ellipse at 50% 30%, oklch(0.22 0.03 160), var(--gd-bg))',
+      }}
+    >
+      <FireflyField count={7} />
 
-          <ul className="mb-6 space-y-4">
-            {POINTS.map((point) => (
-              <li key={point.title} className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                  <point.icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="font-medium text-text">{point.title}</p>
-                  <p className="text-sm text-muted">{point.text}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+      <div className="gd-eyebrow" style={{ position: 'relative', zIndex: 1 }}>
+        {s.eyebrow}
+      </div>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              dismiss();
-            }}
-          >
-            <label htmlFor="onboarding-name" className="mb-1.5 block text-sm font-medium text-text">
-              What should we call you? <span className="font-normal text-muted">(optional)</span>
-            </label>
-            <Input
-              id="onboarding-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              autoComplete="given-name"
-              enterKeyHint="done"
-              className="mb-4"
+      <div
+        key={slide}
+        className="gd-anim-grow"
+        style={{ display: 'flex', justifyContent: 'center', marginTop: 40, marginBottom: 24, position: 'relative', zIndex: 1 }}
+      >
+        <Plant stage={s.plant} color="var(--gd-moss)" size={140} />
+      </div>
+
+      <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        <h1 className="gd-h1" style={{ fontSize: 40, lineHeight: 1.05 }}>
+          {s.title}
+        </h1>
+        <p className="gd-body" style={{ marginTop: 20, maxWidth: 280, marginLeft: 'auto', marginRight: 'auto', color: 'var(--gd-cream-soft)' }}>
+          {s.body}
+        </p>
+      </div>
+
+      <div style={{ flex: 1 }} />
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {SLIDES.map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: i === slide ? 24 : 6,
+                height: 3,
+                borderRadius: 3,
+                background: i === slide ? 'var(--gd-moss)' : 'var(--gd-hair)',
+                transition: 'width 300ms cubic-bezier(0.16,1,0.3,1), background 300ms',
+              }}
             />
-            <Button type="submit" size="lg" className="w-full">
-              Get started
-            </Button>
-          </form>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+          ))}
+        </div>
+        <div style={{ flex: 1 }} />
+        <button type="button" className="gd-btn gd-btn--primary" onClick={next}>
+          {s.cta}
+        </button>
+      </div>
+    </div>
   );
 }

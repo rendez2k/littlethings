@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
+import '@/styles/garden.css';
 import { ThemeScript } from '@/components/theme/theme-script';
 import { AppearanceProvider } from '@/components/theme/appearance-provider';
 import { AuthProvider } from '@/features/auth/auth-provider';
@@ -40,10 +41,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f5f4f1' },
-    { media: '(prefers-color-scheme: dark)', color: '#14161c' },
-  ],
+  themeColor: '#181f1c',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

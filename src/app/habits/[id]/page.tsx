@@ -1,227 +1,231 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
-import { useAppearance } from '@/components/theme/appearance-provider';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { HabitActionsMenu } from '@/components/habits/habit-actions-menu';
-import { MonthCalendar } from '@/components/habits/month-calendar';
-import { useHabitEditor } from '@/components/habits/habit-editor-provider';
-import { getCompletionService, useCompletionsForHabit, useHabit } from '@/features/habits/hooks';
+import { getCompletionService, getHabitService, useHabit, useCompletionsForHabit } from '@/features/habits/hooks';
 import { useAppSettings } from '@/features/settings/hooks';
-import { getHabitIcon } from '@/features/habits/icons';
-import { getHabitAccent } from '@/features/habits/colors';
-import { scheduleLabel } from '@/features/habits/labels';
-import { computeHabitStats } from '@/features/completions/stats';
-import { deriveDayStatus } from '@/features/completions/logic';
+import { syncLocalNotifications } from '@/features/reminders/local-sync';
+import { useConfirm } from '@/components/ui/confirm-dialog';
+import { computeStreak } from '@/features/streaks/streak';
+import { isSatisfied } from '@/features/completions/logic';
+import { Plant, GrowthThread } from '@/components/garden/plant';
+import { GardenMonth } from '@/components/garden/month';
+import { FireflyField, AnimatedNumber, ScreenEnter } from '@/components/garden/motion';
+import { gardenColorVar, stageFromStreak } from '@/components/garden/mapping';
+import type { Habit } from '@/features/habits/schemas';
 import type { Completion } from '@/features/completions/schemas';
-import { fromDateKey, monthKeyOf, todayKey, type DateKey } from '@/lib/dates';
 
-function shiftMonth(monthKey: string, delta: number): string {
-  const [y, m] = monthKey.split('-').map(Number) as [number, number];
-  const d = new Date(y, m - 1 + delta, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+const DAY = 86_400_000;
+
+function pullQuote(streak: number): string {
+  if (streak >= 100) return 'A hundred days. This isn’t a habit any more — it’s just who you are.';
+  if (streak >= 60) return 'Two months of quiet tending. The roots are deep now.';
+  if (streak >= 30) return 'Fully bloomed. You showed up on the ordinary days, and it added up.';
+  if (streak >= 7) return 'A week of small yeses. This is how gardens begin.';
+  if (streak >= 1) return 'You planted something today. Come back tomorrow and water it.';
+  return 'Every plant starts as a seed in the dark. Begin whenever you’re ready.';
 }
 
-export default function HabitDetailsPage() {
-  const params = useParams<{ id: string }>();
-  const id = params.id;
-  const router = useRouter();
-  const habit = useHabit(id);
-  const completions = useCompletionsForHabit(id);
-  const settings = useAppSettings();
-  const { resolvedTheme } = useAppearance();
-  const { openEdit } = useHabitEditor();
-
-  const [today, setToday] = useState<DateKey | null>(null);
-  const [monthKey, setMonthKey] = useState<string | null>(null);
-  useEffect(() => {
-    const t = todayKey(new Date());
-    setToday(t);
-    setMonthKey(monthKeyOf(t));
-  }, []);
-
-  const byDay = useMemo(() => {
-    const map = new Map<DateKey, Completion>();
-    for (const c of completions ?? []) if (!c.deletedAt) map.set(c.date, c);
-    return map;
-  }, [completions]);
-
-  if (habit === undefined || today === null || monthKey === null) {
-    return <div className="pt-6 text-sm text-muted">Loading…</div>;
+function weeklyGrowth(completions: Completion[], habit: Habit, today: Date): number[] {
+  const kept = new Set<string>();
+  for (const c of completions) {
+    if (c.deletedAt) continue;
+    if (c.state === 'skipped' || isSatisfied(habit.target, c.value)) kept.add(c.date);
   }
-  if (habit === null) {
-    return (
-      <div className="pt-10 text-center">
-        <p className="text-muted">This habit no longer exists.</p>
-        <Button className="mt-4" onClick={() => router.push('/habits')}>
-          Back to habits
-        </Button>
-      </div>
-    );
+  const stageForCount = (n: number) => (n >= 6 ? 4 : n >= 4 ? 3 : n >= 2 ? 2 : n >= 1 ? 1 : 0);
+  const out: number[] = [];
+  for (let w = 6; w >= 0; w--) {
+    let count = 0;
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(today.getTime() - (w * 7 + d) * DAY);
+      const key = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+      if (kept.has(key)) count++;
+    }
+    out.push(stageForCount(count));
   }
+  return out;
+}
 
-  const Icon = getHabitIcon(habit.icon);
-  const accent = getHabitAccent(habit.color, resolvedTheme);
-  const stats = computeHabitStats(habit, completions ?? [], today, settings.weekStartsOn);
-  const currentMonth = monthKeyOf(today);
-
-  const onCycle = (date: DateKey) => {
-    const service = getCompletionService();
-    const status = deriveDayStatus(habit, byDay.get(date), date, today);
-    if (status === 'complete') service.skip(habit.id, date);
-    else if (status === 'skipped') service.clear(habit.id, date);
-    else service.complete(habit.id, date);
-  };
-
-  const recent = (completions ?? [])
-    .filter((c) => !c.deletedAt)
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 8);
-
+function StatCard({ label, value, suffix, color }: { label: string; value: ReactNode; suffix?: string; color?: string }) {
   return (
-    <div className="pb-4">
-      <div className="flex items-center justify-between py-3">
-        <button
-          type="button"
-          onClick={() => router.push('/habits')}
-          aria-label="Back to habits"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-muted hover:bg-surface hover:text-text"
-        >
-          <ChevronLeft className="h-6 w-6" aria-hidden="true" />
-        </button>
-        <HabitActionsMenu
-          habit={habit}
-          onEdit={openEdit}
-          onDeleted={() => router.push('/habits')}
-        />
+    <div className="gd-card" style={{ padding: '12px 10px' }}>
+      <div className="gd-eyebrow">{label}</div>
+      <div style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: color ?? 'var(--gd-cream)', marginTop: 2, lineHeight: 1 }}>
+        {value}
+        {suffix ? <span style={{ fontSize: 12, color: 'var(--gd-cream-faint)' }}>{suffix}</span> : null}
       </div>
-
-      <div className="mb-6 flex items-center gap-4">
-        <span
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl"
-          style={{ backgroundColor: accent.soft, color: accent.accent }}
-          aria-hidden="true"
-        >
-          <Icon className="h-8 w-8" />
-        </span>
-        <div className="min-w-0">
-          <h1 className="truncate text-2xl font-bold tracking-tight text-text">{habit.name}</h1>
-          <p className="text-sm text-muted">
-            {scheduleLabel(habit.schedule)}
-            {habit.status === 'paused' ? ' · Paused' : ''}
-            {habit.status === 'archived' ? ' · Archived' : ''}
-          </p>
-        </div>
-      </div>
-
-      <div className="mb-6 grid grid-cols-3 gap-3">
-        <Stat
-          label={`Current ${unitLabel(stats.current, stats.unit)}`}
-          value={String(stats.current)}
-        />
-        <Stat label={`Best ${unitLabel(stats.best, stats.unit)}`} value={String(stats.best)} />
-        <Stat
-          label="Completion"
-          value={stats.opportunities === 0 ? '—' : `${Math.round(stats.completionRate * 100)}%`}
-        />
-      </div>
-
-      <Card className="mb-6">
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            aria-label="Previous month"
-            onClick={() => setMonthKey(shiftMonth(monthKey, -1))}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-muted hover:text-text"
-          >
-            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-          </button>
-          <p className="text-sm font-semibold text-text">
-            {fromDateKey(`${monthKey}-01`).toLocaleDateString(undefined, {
-              month: 'long',
-              year: 'numeric',
-            })}
-          </p>
-          <button
-            type="button"
-            aria-label="Next month"
-            onClick={() => setMonthKey(shiftMonth(monthKey, 1))}
-            disabled={monthKey >= currentMonth}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-muted hover:text-text disabled:opacity-30"
-          >
-            <ChevronRight className="h-5 w-5" aria-hidden="true" />
-          </button>
-        </div>
-        <MonthCalendar
-          habit={habit}
-          byDay={byDay}
-          monthKey={monthKey}
-          today={today}
-          weekStartsOn={settings.weekStartsOn}
-          onCycle={onCycle}
-        />
-        <p className="mt-3 text-xs text-muted">
-          Tap a day to cycle done → skipped → clear. Nothing here is ever a failure.
-        </p>
-      </Card>
-
-      {habit.notes ? (
-        <Card className="mb-6">
-          <h2 className="mb-1 text-sm font-semibold text-text">Notes</h2>
-          <p className="whitespace-pre-wrap text-sm text-muted">{habit.notes}</p>
-        </Card>
-      ) : null}
-
-      <section className="mb-6">
-        <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
-          Recent history
-        </h2>
-        {recent.length === 0 ? (
-          <p className="px-1 text-sm text-muted">No history yet — tap a day above to log one.</p>
-        ) : (
-          <ul className="divide-y divide-border overflow-hidden rounded-card border border-border bg-surface">
-            {recent.map((c) => (
-              <li key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
-                <span className="text-text">
-                  {fromDateKey(c.date).toLocaleDateString(undefined, {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short',
-                  })}
-                </span>
-                <span className="capitalize text-muted">
-                  {c.state === 'complete'
-                    ? habit.target.type === 'boolean'
-                      ? 'Completed'
-                      : `${c.value}${habit.target.type === 'duration' ? ' min' : ''}`
-                    : 'Skipped'}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <Button variant="secondary" className="w-full" onClick={() => openEdit(habit)}>
-        <Pencil className="h-4 w-4" aria-hidden="true" />
-        Edit habit
-      </Button>
     </div>
   );
 }
 
-function unitLabel(value: number, unit: 'day' | 'week' | 'month'): string {
-  return value === 1 ? unit : `${unit}s`;
-}
+export default function PlantDetailPage() {
+  const params = useParams<{ id: string }>();
+  const id = params?.id ?? null;
+  const router = useRouter();
+  const confirm = useConfirm();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-function Stat({ label, value }: { label: string; value: string }) {
+  const habit = useHabit(id);
+  const completions = useCompletionsForHabit(id);
+  const settings = useAppSettings();
+
+  const toggleDay = (date: string, kept: boolean) => {
+    if (!id) return;
+    if (kept) void getCompletionService().clear(id, date);
+    else void getCompletionService().complete(id, date);
+  };
+  const deletePlant = async () => {
+    if (!id || !habit) return;
+    const ok = await confirm({
+      title: `Pull up “${habit.name}”?`,
+      description: 'This removes the plant and its whole history from this device. It can’t be undone.',
+      confirmLabel: 'Pull it up',
+      destructive: true,
+    });
+    if (!ok) return;
+    await getHabitService().softDelete(id);
+    router.push('/habits');
+  };
+  const togglePause = async () => {
+    if (!id || !habit) return;
+    if (habit.status === 'paused') await getHabitService().resume(id);
+    else await getHabitService().pause(id);
+    void syncLocalNotifications();
+  };
+  const toggleArchive = async () => {
+    if (!id || !habit) return;
+    if (habit.status === 'archived') await getHabitService().unarchive(id);
+    else {
+      await getHabitService().archive(id);
+      router.push('/habits');
+    }
+    void syncLocalNotifications();
+  };
+
+  const derived = useMemo(() => {
+    if (!habit || completions === undefined) return null;
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const streak = computeStreak(habit, completions, today, settings.weekStartsOn);
+    const stage = stageFromStreak(streak.current);
+    const planted = Math.max(0, Math.floor((now.getTime() - new Date(habit.createdAt).getTime()) / DAY));
+    const monthPrefix = today.slice(0, 7);
+    const keptThisMonth = new Set<string>();
+    for (const c of completions) {
+      if (c.deletedAt || !c.date.startsWith(monthPrefix)) continue;
+      if (c.state === 'skipped' || isSatisfied(habit.target, c.value)) keptThisMonth.add(c.date);
+    }
+    return {
+      streak,
+      stage,
+      planted,
+      color: gardenColorVar(habit.color),
+      growth: weeklyGrowth(completions, habit, now),
+      monthKept: keptThisMonth.size,
+      monthElapsed: now.getDate(),
+    };
+  }, [habit, completions, settings.weekStartsOn]);
+
+  if (!mounted || habit === undefined || !derived) return <div style={{ padding: '54px 22px' }} />;
+  if (habit === null) {
+    return (
+      <div style={{ padding: '54px 22px' }}>
+        <Link href="/habits" className="gd-eyebrow" style={{ textDecoration: 'none' }}>
+          ‹ All plants
+        </Link>
+        <div className="gd-body" style={{ marginTop: 16 }}>This plant is no longer here.</div>
+      </div>
+    );
+  }
+
+  const { streak, stage, planted, color, growth, monthKept, monthElapsed } = derived;
+  const words = habit.name.split(' ');
+  const lead = words.slice(0, -1).join(' ');
+  const last = words[words.length - 1];
+
   return (
-    <div className="rounded-card border border-border bg-surface p-3 text-center shadow-card">
-      <p className="text-xl font-bold text-text">{value}</p>
-      <p className="mt-0.5 text-xs text-muted">{label}</p>
+    <div style={{ padding: '54px 22px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <Link href="/habits" className="gd-eyebrow" style={{ textDecoration: 'none', letterSpacing: '0.2em' }}>
+          ‹ All plants
+        </Link>
+        <Link href={`/plant?id=${habit.id}`} className="gd-eyebrow gd-eyebrow--accent" style={{ textDecoration: 'none' }}>
+          Edit
+        </Link>
+      </div>
+
+      <ScreenEnter stagger={50}>
+        <div
+          style={{
+            borderRadius: 20,
+            padding: '28px 16px 16px',
+            background: 'linear-gradient(180deg, oklch(0.24 0.04 160), var(--gd-bg-soft))',
+            border: '1px solid var(--gd-hair)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <FireflyField count={5} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <Plant stage={stage} color={color} size={160} />
+          </div>
+          <div className="gd-soil" style={{ width: '80%', marginTop: 4 }} />
+        </div>
+
+        <div style={{ marginTop: 18 }}>
+          <h1 className="gd-h1" style={{ fontSize: 28, lineHeight: 1.1 }}>
+            {lead ? `${lead} ` : ''}
+            <em style={{ color: stage === 4 ? 'var(--gd-bloom)' : 'var(--gd-moss)' }}>{last}.</em>
+          </h1>
+          <div className="gd-meta" style={{ marginTop: 4 }}>
+            Planted {planted} {planted === 1 ? 'day' : 'days'} ago · {stage === 4 ? 'fully bloomed' : `stage ${stage} of 4`}
+          </div>
+        </div>
+
+        <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+          <StatCard label="Streak" value={<AnimatedNumber value={streak.current} />} suffix="d" color={color} />
+          <StatCard label="Longest" value={streak.best} suffix="d" color="var(--gd-bloom)" />
+          <StatCard label="This month" value={`${monthKept}/${monthElapsed}`} color="var(--gd-gold)" />
+        </div>
+
+        <div style={{ marginTop: 22 }}>
+          <div className="gd-eyebrow">Growth</div>
+          <div className="gd-card" style={{ marginTop: 10, padding: '18px 14px' }}>
+            <GrowthThread stages={growth} color={color} labels={['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7']} />
+          </div>
+        </div>
+
+        <div className="gd-card gd-card--accent" style={{ marginTop: 18, padding: '16px 18px' }}>
+          <div className="gd-quote">&ldquo;{pullQuote(streak.current)}&rdquo;</div>
+        </div>
+
+        <div style={{ marginTop: 22 }}>
+          <div className="gd-eyebrow">Fix a day</div>
+          <div className="gd-card" style={{ marginTop: 10, padding: 16 }}>
+            <GardenMonth habit={habit} completions={completions ?? []} color={color} weekStartsOn={settings.weekStartsOn} onToggle={toggleDay} />
+          </div>
+        </div>
+
+        <div style={{ marginTop: 18, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Link href={`/plant?id=${habit.id}`} className="gd-btn gd-btn--ghost" style={{ textDecoration: 'none', flex: '1 1 auto', textAlign: 'center' }}>
+            Edit
+          </Link>
+          <button type="button" onClick={togglePause} className="gd-btn gd-btn--ghost" style={{ flex: '1 1 auto' }}>
+            {habit.status === 'paused' ? 'Resume' : 'Pause'}
+          </button>
+          <button type="button" onClick={toggleArchive} className="gd-btn gd-btn--ghost" style={{ flex: '1 1 auto' }}>
+            {habit.status === 'archived' ? 'Unarchive' : 'Archive'}
+          </button>
+          <button type="button" onClick={deletePlant} className="gd-btn gd-btn--ghost" style={{ flex: '1 1 auto', color: 'var(--gd-danger)' }}>
+            Pull up
+          </button>
+        </div>
+      </ScreenEnter>
     </div>
   );
 }

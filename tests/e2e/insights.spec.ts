@@ -1,25 +1,26 @@
 import { expect, test } from './fixtures';
 
-test('insights show metrics and switch range', async ({ page }) => {
+test('season shows plots over time and switches range', async ({ page }) => {
+  // Plant a habit and tend it so the season has growth to show.
   await page.goto('/');
-  await page.getByRole('button', { name: 'Create my first habit' }).click();
-  await page.getByLabel('Name').fill('Meditate');
-  await page.getByRole('button', { name: 'Save' }).click();
-  await page.getByRole('button', { name: 'Mark Meditate done' }).click();
-  await expect(page.getByRole('img', { name: '1 of 1 complete' })).toBeVisible();
+  await page.getByRole('link', { name: 'Plant your first' }).click();
+  await page.getByLabel('Name it').fill('Meditate');
+  await page.getByRole('button', { name: 'Plant', exact: true }).click();
+  await page.getByRole('link', { name: 'Garden' }).click();
+  await page.getByRole('button', { name: 'Tend Meditate' }).first().click();
+  await expect(page.getByRole('img', { name: '1 of 1 tended' })).toBeVisible();
 
-  await page.getByRole('link', { name: 'Insights' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Insights' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Completion trend' })).toBeVisible();
-  await expect(page.getByText('Completion this week', { exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Habit performance' })).toBeVisible();
+  await page.getByRole('link', { name: 'Season' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Your garden');
+  await expect(page.getByText('Each plot over time')).toBeVisible();
+  await expect(page.getByText('Tallest plant')).toBeVisible();
 
-  // Range switch keeps the screen coherent.
-  await page.getByRole('radio', { name: 'Month' }).click();
-  await expect(page.getByText('Perfect days this month')).toBeVisible();
+  // The range toggle keeps the screen coherent.
+  await page.getByRole('button', { name: '6m' }).click();
+  await expect(page.getByRole('button', { name: '6m' })).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('insights show an encouraging empty state with no habits', async ({ page }) => {
+test('season greets an empty garden gently', async ({ page }) => {
   await page.goto('/insights');
-  await expect(page.getByText('No insights yet')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Your garden is waking');
 });

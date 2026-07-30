@@ -7,9 +7,9 @@ import { expect, test } from './fixtures';
  */
 test('keeps working after going offline', async ({ page, context }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Create my first habit' }).click();
-  await page.getByLabel('Name').fill('Meditate');
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('link', { name: 'Plant your first' }).click();
+  await page.getByLabel('Name it').fill('Meditate');
+  await page.getByRole('button', { name: 'Plant', exact: true }).click();
   await expect(page.getByText('Meditate')).toBeVisible();
 
   // Wait for the service worker to take control and cache the shell/assets.
@@ -18,17 +18,18 @@ test('keeps working after going offline', async ({ page, context }) => {
   });
   await page.waitForTimeout(1500);
 
-  // Go offline and reload.
+  // Go offline and reload the current screen (Plants).
   await context.setOffline(true);
   await page.reload();
 
   // The app shell loads from cache and local data is intact.
-  await expect(page.getByRole('heading', { level: 1, name: 'Today' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'All plants' })).toBeVisible();
   await expect(page.getByText('Meditate')).toBeVisible();
 
   // Local navigation still works while offline.
-  await page.getByRole('link', { name: 'Habits' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Habits' })).toBeVisible();
+  await page.getByRole('link', { name: 'Garden' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Your garden' })).toBeVisible();
+  await expect(page.getByText('Meditate').first()).toBeVisible();
 
   await context.setOffline(false);
 });
