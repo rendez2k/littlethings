@@ -148,7 +148,7 @@ body {
   .gd-shell-frame {
     height: 100%;
     max-height: 920px;
-    max-width: 37rem;
+    max-width: 40rem;
     border: 1px solid var(--gd-hair-strong);
     border-radius: 38px;
     overflow: hidden;
