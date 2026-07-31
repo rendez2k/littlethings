@@ -20,6 +20,18 @@ export function AppearanceSettings() {
 
   return (
     <SettingsSection title="Appearance 🎨">
+      <SettingsRow label="Look" description="The new garden, or the classic look.">
+        <SegmentedControl
+          ariaLabel="Look"
+          value={appearance.look}
+          onChange={(look) => setAppearance({ look })}
+          options={[
+            { value: 'garden', label: 'Garden' },
+            { value: 'classic', label: 'Classic' },
+          ]}
+        />
+      </SettingsRow>
+
       <SettingsRow label="Theme" description="Match your device or choose a look.">
         <SegmentedControl
           ariaLabel="Theme"

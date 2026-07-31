@@ -13,6 +13,7 @@ import { SettingsRow, SettingsSection } from '@/components/settings/settings-sec
 import { Footer } from '@/components/layout/footer';
 import { APP_VERSION } from '@/lib/constants';
 import { useIsNativeApp } from '@/lib/platform';
+import { useAppearance } from '@/components/theme/appearance-provider';
 
 function LinkRow({
   href,
@@ -36,9 +37,16 @@ function LinkRow({
 
 export default function SettingsPage() {
   const isNative = useIsNativeApp();
-  return (
-    <div style={{ padding: '54px 22px 24px' }}>
-      <PageHeader title="The shed" subtitle="Your tools and preferences." />
+  const { appearance } = useAppearance();
+  const classic = appearance.look === 'classic';
+
+  const body = (
+    <>
+      {classic ? (
+        <PageHeader title="Settings" />
+      ) : (
+        <PageHeader title="The shed" subtitle="Your tools and preferences." />
+      )}
 
       <AppearanceSettings />
       <HabitSettings />
@@ -72,6 +80,10 @@ export default function SettingsPage() {
       </SettingsSection>
 
       <Footer />
-    </div>
+    </>
   );
+
+  // The garden shell has no page padding, so garden mode adds its own inset;
+  // the classic shell already pads its content column.
+  return classic ? body : <div style={{ padding: '54px 22px 24px' }}>{body}</div>;
 }

@@ -14,9 +14,18 @@ test('export, reset and re-import restores the data', async ({ page }) => {
   const download = await downloadPromise;
   const backupPath = await download.path();
 
-  // Reset everything (navigates back to the empty garden).
+  // Reset everything. This restores the default appearance (classic), so
+  // re-pin the garden look and reload to keep this journey in the garden.
   await page.getByRole('button', { name: 'Reset', exact: true }).click();
   await page.getByRole('button', { name: 'Reset everything' }).click();
+  await page.waitForURL('**/');
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'little-things.appearance.v1',
+      JSON.stringify({ theme: 'system', palette: 'lavender', density: 'comfortable', reducedMotion: false, look: 'garden' }),
+    ),
+  );
+  await page.goto('/');
   await expect(page.getByText('Nothing planted yet')).toBeVisible();
 
   // Re-import the backup (merge).

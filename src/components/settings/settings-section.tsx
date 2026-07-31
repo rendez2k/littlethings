@@ -1,5 +1,8 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { useLook } from '@/components/theme/appearance-provider';
 
 export function SettingsSection({
   title,
@@ -10,6 +13,19 @@ export function SettingsSection({
   children: ReactNode;
   className?: string;
 }) {
+  const look = useLook();
+
+  if (look === 'classic') {
+    return (
+      <section className={cn('mb-6', className)}>
+        <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted">{title}</h2>
+        <div className="divide-y divide-border overflow-hidden rounded-card border border-border bg-surface">
+          {children}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={cn('mb-6', className)}>
       <h2 className="gd-eyebrow" style={{ marginBottom: 10, paddingLeft: 2 }}>

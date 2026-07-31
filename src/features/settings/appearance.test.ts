@@ -23,6 +23,7 @@ describe('parseAppearance', () => {
       palette: 'mint',
       density: 'compact',
       reducedMotion: true,
+      look: 'classic',
     };
     expect(parseAppearance(JSON.stringify(settings))).toEqual(settings);
   });
