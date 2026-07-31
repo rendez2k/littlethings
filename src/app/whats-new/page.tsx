@@ -7,6 +7,13 @@ export const metadata: Metadata = { title: "What's new" };
 
 const RELEASES: Release[] = [
   {
+    version: '0.4.1',
+    date: 'One-offs that wait properly',
+    items: [
+      'A one-off task now simply waits on Today until you get to it, however long that takes — it never shows as “missed”, never dents your streaks or Insights, and once you tick it off it settles on the day you actually did it.',
+    ],
+  },
+  {
     version: '0.4.0',
     date: 'The classic look is back',
     items: [

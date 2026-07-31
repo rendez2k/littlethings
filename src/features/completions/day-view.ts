@@ -76,32 +76,33 @@ export function buildDayView(
   }
 
   const scheduled = scheduledForDay(habits, date);
-  const shownIds = new Set(scheduled.map((h) => h.id));
   const entries: DayEntry[] = scheduled.map((habit) => {
     const completion = byHabit.get(habit.id);
     return { habit, completion, status: deriveDayStatus(habit, completion, date, today) };
   });
 
-  // Carry unfinished one-offs onto today so they can still be ticked off.
-  if (date === today && everCompletedHabitIds) {
-    for (const habit of habits) {
-      if (habit.schedule.type !== 'once' || shownIds.has(habit.id)) continue;
-      if (habit.status === 'archived' || habit.deletedAt) continue;
-      if (habit.startDate > date || !isWithinRange(habit, date) || isPausedOn(habit, date)) continue;
-      const completion = byHabit.get(habit.id);
-      // Hide once it was finished on an earlier day; keep it if done *today*.
-      if (everCompletedHabitIds.has(habit.id) && !completion) continue;
+  // One-offs are open tasks, not tied to a due-day (they aren't "scheduled").
+  // Show one on the day it was done or skipped, or waiting on today until it's
+  // resolved. They never "miss" and never appear on a day they weren't acted on.
+  for (const habit of habits) {
+    if (habit.schedule.type !== 'once') continue;
+    if (habit.status === 'archived' || habit.deletedAt) continue;
+    if (habit.startDate > date || !isWithinRange(habit, date) || isPausedOn(habit, date)) continue;
+    const completion = byHabit.get(habit.id);
+    if (completion && !completion.deletedAt) {
+      // Acted on this day → show it here with its status.
       const status: DayStatus =
-        completion && !completion.deletedAt
-          ? completion.state === 'skipped'
-            ? 'skipped'
-            : isSatisfied(habit.target, completion.value)
-              ? 'complete'
-              : completion.value > 0
-                ? 'partial'
-                : 'pending'
-          : 'pending';
+        completion.state === 'skipped'
+          ? 'skipped'
+          : isSatisfied(habit.target, completion.value)
+            ? 'complete'
+            : completion.value > 0
+              ? 'partial'
+              : 'pending';
       entries.push({ habit, completion, status });
+    } else if (date === today && everCompletedHabitIds && !everCompletedHabitIds.has(habit.id)) {
+      // Not yet resolved anywhere → keep waiting on today.
+      entries.push({ habit, completion: undefined, status: 'pending' });
     }
   }
 

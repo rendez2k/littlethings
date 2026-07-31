@@ -31,8 +31,12 @@ export function matchesRecurrence(schedule: Schedule, startDate: DateKey, key: D
       const delta = diffInDays(key, startDate);
       return delta >= 0 && delta % schedule.intervalDays === 0;
     }
+    // A one-off is an open task, not tied to a due-day: it never counts as
+    // "scheduled" (so it can't be missed and stays out of streaks / insights).
+    // The day view surfaces it directly — waiting on today until it's done or
+    // skipped, then showing only on the day it was acted on.
     case 'once':
-      return key === startDate;
+      return false;
     // Flexible targets can be completed on any day within their period; they are
     // "available" every day and their success is judged per week/month.
     case 'times_per_week':

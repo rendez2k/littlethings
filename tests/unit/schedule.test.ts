@@ -23,8 +23,8 @@ describe('matchesRecurrence', () => {
     expect(matchesRecurrence(sched, '2024-05-01', '2024-05-03')).toBe(false);
   });
 
-  it('once matches only the start date', () => {
-    expect(matchesRecurrence({ type: 'once' }, '2024-05-01', '2024-05-01')).toBe(true);
+  it('once is never a matched recurrence (one-offs are open tasks, not due-day bound)', () => {
+    expect(matchesRecurrence({ type: 'once' }, '2024-05-01', '2024-05-01')).toBe(false);
     expect(matchesRecurrence({ type: 'once' }, '2024-05-01', '2024-05-02')).toBe(false);
   });
 
