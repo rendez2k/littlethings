@@ -10,7 +10,7 @@
  *
  * Bump CACHE_VERSION to invalidate old caches on deploy.
  */
-const CACHE_VERSION = 'v9';
+const CACHE_VERSION = 'v10';
 const SHELL_CACHE = `little-things-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `little-things-assets-${CACHE_VERSION}`;
 
