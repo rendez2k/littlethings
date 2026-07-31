@@ -79,8 +79,10 @@
    `rgb(var(--color-x))`) to garden values. `:root:root` out-specifies the
    theme/palette attribute blocks in globals.css so the garden world wins in
    every theme. Screens not yet fully reskinned still read as garden.
+   Gated on `data-look="garden"` so the "classic" look keeps the original
+   light/dark/pastel themes.
    ------------------------------------------------------------------------- */
-:root:root {
+:root[data-look='garden'] {
   color-scheme: dark;
   --color-background: 24 31 28;
   --color-surface: 30 38 34;
@@ -98,7 +100,7 @@
   --shadow-card: 0 1px 2px oklch(0.1 0.02 160 / 0.4), 0 6px 16px oklch(0.1 0.02 160 / 0.4);
 }
 
-body {
+:root[data-look='garden'] body {
   font-family: var(--gd-font-ui);
 }
 

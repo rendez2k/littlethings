@@ -1,16 +1,18 @@
 import type { Metadata } from 'next';
 import { SubPage } from '@/components/layout/sub-page';
+import { ReleaseList, type Release } from '@/components/whats-new/release-list';
 import { APP_VERSION } from '@/lib/constants';
 
 export const metadata: Metadata = { title: "What's new" };
 
-interface Release {
-  version: string;
-  date: string;
-  items: string[];
-}
-
 const RELEASES: Release[] = [
+  {
+    version: '0.4.0',
+    date: 'Garden or classic — your choice',
+    items: [
+      'Prefer the original look? You can now switch between the new Garden and the Classic design any time — Settings → Appearance → Look. Your habits, streaks and goals are exactly the same underneath. 🌿',
+    ],
+  },
   {
     version: '0.3.1',
     date: 'Five kinds of plant',
@@ -188,28 +190,7 @@ const RELEASES: Release[] = [
 export default function WhatsNewPage() {
   return (
     <SubPage title="What's new">
-      <p className="gd-body-sm">
-        You&rsquo;re on version {APP_VERSION}. Here&rsquo;s what&rsquo;s new.
-      </p>
-      {RELEASES.map((release) => (
-        <section key={release.version} className="gd-card" style={{ padding: 16 }}>
-          <div className="mb-3 flex items-baseline justify-between gap-3">
-            <h2 style={{ fontFamily: 'var(--gd-font-display)', fontSize: 18, color: 'var(--gd-cream)' }}>
-              <em style={{ color: 'var(--gd-moss)', fontStyle: 'italic' }}>{release.date}</em>
-            </h2>
-            <span className="gd-eyebrow" style={{ flexShrink: 0 }}>
-              v{release.version}
-            </span>
-          </div>
-          <ul className="list-disc space-y-1.5 pl-5 gd-body-sm marker:text-[color:var(--gd-moss)]">
-            {release.items.map((item) => (
-              <li key={item} style={{ lineHeight: 1.5 }}>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      <ReleaseList releases={RELEASES} version={APP_VERSION} />
     </SubPage>
   );
 }

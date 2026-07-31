@@ -14,7 +14,8 @@ export function ThemeScript() {
       theme:['system','light','dark','pastel'].indexOf(p.theme)>-1?p.theme:d.theme,
       palette:['lavender','sky','mint','peach','rose','lemon'].indexOf(p.palette)>-1?p.palette:d.palette,
       density:['comfortable','compact'].indexOf(p.density)>-1?p.density:d.density,
-      reducedMotion:typeof p.reducedMotion==='boolean'?p.reducedMotion:d.reducedMotion
+      reducedMotion:typeof p.reducedMotion==='boolean'?p.reducedMotion:d.reducedMotion,
+      look:['garden','classic'].indexOf(p.look)>-1?p.look:d.look
     };}}catch(e){}
     var prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
     var resolved=s.theme==='system'?(prefersDark?'dark':'light'):s.theme;
@@ -23,6 +24,7 @@ export function ThemeScript() {
     r.setAttribute('data-palette',s.palette);
     r.setAttribute('data-density',s.density);
     r.setAttribute('data-reduced-motion',String(s.reducedMotion));
+    r.setAttribute('data-look',s.look);
   }catch(e){}})();`;
 
   return <script dangerouslySetInnerHTML={{ __html: script }} suppressHydrationWarning />;

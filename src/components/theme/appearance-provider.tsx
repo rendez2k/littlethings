@@ -85,3 +85,13 @@ export function useAppearance(): AppearanceContextValue {
   }
   return ctx;
 }
+
+/**
+ * The current look, safe to call outside an AppearanceProvider (defaults to
+ * garden). Shared primitives use this so they can also render in isolation,
+ * e.g. component tests, without a provider.
+ */
+export function useLook(): AppearanceSettings['look'] {
+  const ctx = useContext(AppearanceContext);
+  return ctx?.appearance.look ?? 'garden';
+}

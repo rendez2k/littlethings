@@ -3,7 +3,7 @@ import { habitSchema } from '@/features/habits/schemas';
 import { completionSchema } from '@/features/completions/schemas';
 import { goalSchema } from '@/features/goals/schemas';
 import { appSettingsSchema } from '@/features/settings/schemas';
-import { DENSITIES, PALETTES, THEME_MODES } from '@/features/settings/appearance';
+import { DENSITIES, LOOKS, PALETTES, THEME_MODES } from '@/features/settings/appearance';
 
 /**
  * Portable backup format (brief §17). Versioned so future shapes can migrate,
@@ -16,6 +16,8 @@ const appearanceSchema = z.object({
   palette: z.enum(PALETTES),
   density: z.enum(DENSITIES),
   reducedMotion: z.boolean(),
+  // Added later; old backups default to the garden look on import.
+  look: z.enum(LOOKS).catch('garden').default('garden'),
 });
 
 export const exportBundleSchema = z.object({

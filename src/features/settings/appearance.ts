@@ -16,6 +16,10 @@ export type Palette = (typeof PALETTES)[number];
 export const DENSITIES = ['comfortable', 'compact'] as const;
 export type Density = (typeof DENSITIES)[number];
 
+/** The overall visual identity: the new "garden" world or the "classic" one. */
+export const LOOKS = ['garden', 'classic'] as const;
+export type Look = (typeof LOOKS)[number];
+
 /** Concrete theme applied to `<html>`. Pastel is a soft light-family theme. */
 export type ResolvedTheme = 'light' | 'dark' | 'pastel';
 
@@ -29,6 +33,7 @@ export interface AppearanceSettings {
   palette: Palette;
   density: Density;
   reducedMotion: boolean;
+  look: Look;
 }
 
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
@@ -36,6 +41,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   palette: 'lavender',
   density: 'comfortable',
   reducedMotion: false,
+  look: 'garden',
 };
 
 export const APPEARANCE_STORAGE_KEY = 'little-things.appearance.v1';
@@ -68,6 +74,9 @@ function isPalette(value: unknown): value is Palette {
 function isDensity(value: unknown): value is Density {
   return typeof value === 'string' && (DENSITIES as readonly string[]).includes(value);
 }
+function isLook(value: unknown): value is Look {
+  return typeof value === 'string' && (LOOKS as readonly string[]).includes(value);
+}
 
 /** Parse persisted appearance defensively, falling back to defaults per field. */
 export function parseAppearance(raw: string | null | undefined): AppearanceSettings {
@@ -82,6 +91,7 @@ export function parseAppearance(raw: string | null | undefined): AppearanceSetti
         typeof data.reducedMotion === 'boolean'
           ? data.reducedMotion
           : DEFAULT_APPEARANCE.reducedMotion,
+      look: isLook(data.look) ? data.look : DEFAULT_APPEARANCE.look,
     };
   } catch {
     return { ...DEFAULT_APPEARANCE };
@@ -119,4 +129,5 @@ export function applyAppearanceToDocument(
   root.setAttribute('data-palette', settings.palette);
   root.setAttribute('data-density', settings.density);
   root.setAttribute('data-reduced-motion', String(settings.reducedMotion));
+  root.setAttribute('data-look', settings.look);
 }
