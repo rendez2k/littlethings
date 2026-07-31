@@ -62,7 +62,7 @@ export default function SettingsPage() {
         ) : null}
         <LinkRow href="/settings/privacy" label="Privacy" />
         <LinkRow href="/settings/terms" label="Terms" />
-        <a href="mailto:redwards2k@gmail.com?subject=Little%20Things%20feedback" className="block">
+        <a href="mailto:hello@productkit.digital?subject=Little%20Things%20feedback" className="block">
           <SettingsRow
             label="Feedback"
             description="Tell us what would make this better"
