@@ -1,7 +1,18 @@
 import { expect, test } from '@playwright/test';
 
 // Uses the raw base (no onboarding pre-dismissal) to exercise first-run.
+// Pins the garden look (app default is classic) to test the garden onboarding.
 test('shows onboarding once, then not again', async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem(
+        'little-things.appearance.v1',
+        JSON.stringify({ theme: 'system', palette: 'lavender', density: 'comfortable', reducedMotion: false, look: 'garden' }),
+      );
+    } catch {
+      /* ignore */
+    }
+  });
   await page.goto('/');
   await expect(page.getByRole('dialog', { name: 'Welcome to Little Things' })).toBeVisible();
 

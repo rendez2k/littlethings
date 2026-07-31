@@ -41,7 +41,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   palette: 'lavender',
   density: 'comfortable',
   reducedMotion: false,
-  look: 'garden',
+  look: 'classic',
 };
 
 export const APPEARANCE_STORAGE_KEY = 'little-things.appearance.v1';

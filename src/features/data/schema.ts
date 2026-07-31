@@ -16,8 +16,8 @@ const appearanceSchema = z.object({
   palette: z.enum(PALETTES),
   density: z.enum(DENSITIES),
   reducedMotion: z.boolean(),
-  // Added later; old backups default to the garden look on import.
-  look: z.enum(LOOKS).catch('garden').default('garden'),
+  // Added later; old backups default to the classic look on import.
+  look: z.enum(LOOKS).catch('classic').default('classic'),
 });
 
 export const exportBundleSchema = z.object({

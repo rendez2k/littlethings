@@ -8,9 +8,9 @@ export const metadata: Metadata = { title: "What's new" };
 const RELEASES: Release[] = [
   {
     version: '0.4.0',
-    date: 'Garden or classic — your choice',
+    date: 'The classic look is back',
     items: [
-      'Prefer the original look? You can now switch between the new Garden and the Classic design any time — Settings → Appearance → Look. Your habits, streaks and goals are exactly the same underneath. 🌿',
+      'The original design is back — and it’s the default again. Fancy the garden instead? It’s one tap away in Settings → Appearance → Look, and you can switch whenever you like. Same habits, streaks and goals underneath, whichever you choose. 🌿',
     ],
   },
   {
