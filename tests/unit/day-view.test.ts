@@ -73,10 +73,18 @@ describe('buildDayView', () => {
       expect(view.entries).toHaveLength(0);
     });
 
-    it('does not carry one-offs onto past days (only today)', () => {
+    it('does not show a one-off on a past day it was not acted on (never missed)', () => {
       const past = '2024-05-12';
       const view = buildDayView([oneOff], [], past, TODAY, new Set());
       expect(view.entries).toHaveLength(0);
+    });
+
+    it('shows a one-off on the past day it was completed', () => {
+      const past = '2024-05-12';
+      const done = makeCompletion(oneOff.id, past, { state: 'complete', value: 1 });
+      const view = buildDayView([oneOff], [done], past, TODAY, new Set([oneOff.id]));
+      expect(view.entries.map((e) => e.habit.id)).toEqual([oneOff.id]);
+      expect(view.entries[0]!.status).toBe('complete');
     });
 
     it('keeps a partially-done one-off on today (partial ≠ resolved)', () => {
