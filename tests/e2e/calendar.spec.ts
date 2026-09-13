@@ -56,6 +56,9 @@ test('add a habit from the calendar, dated to the selected day', async ({ page }
   await expect(page.getByLabel('Start date')).toHaveValue(todayKey());
   await page.getByLabel('Name it').fill('Journal');
   await page.getByRole('button', { name: 'Plant', exact: true }).click();
+  // Wait for the save to land (the editor moves to Plants) before navigating
+  // away, otherwise the write can be cut off mid-flight on a slow runner.
+  await expect(page.getByRole('heading', { level: 1, name: 'All plants' })).toBeVisible();
 
   await page.goto('/calendar');
   await expect(page.getByRole('link', { name: 'Open Journal' })).toBeVisible();
