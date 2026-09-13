@@ -10,7 +10,7 @@ import type { HabitColor, Schedule, Target } from '@/features/habits/schemas';
 import { ScreenEnter } from '@/components/garden/motion';
 import { Seed } from '@/components/garden/plant';
 import { gardenColor, gardenVar, type GardenColor } from '@/components/garden/mapping';
-import { todayKey, type Weekday } from '@/lib/dates';
+import { isValidDateKey, todayKey, type Weekday } from '@/lib/dates';
 
 const GARDEN_TO_HABIT: Record<GardenColor, HabitColor> = {
   moss: 'mint',
@@ -74,6 +74,9 @@ function PlantEditor() {
   const editId = search.get('id');
   const existing = useHabit(editId);
   const isEdit = Boolean(editId);
+  // The calendar can open this editor pre-dated to the day that was selected.
+  const dateParam = search.get('date');
+  const prefillDate = !isEdit && dateParam && isValidDateKey(dateParam) ? dateParam : null;
 
   const [ready, setReady] = useState(!editId);
   const [name, setName] = useState('');
@@ -89,9 +92,10 @@ function PlantEditor() {
   const [reminderOn, setReminderOn] = useState(false);
   const [reminderTime, setReminderTime] = useState('09:00');
   const [notes, setNotes] = useState('');
-  const [startDate, setStartDate] = useState(todayKey(new Date()));
+  const [startDate, setStartDate] = useState(() => prefillDate ?? todayKey(new Date()));
   const [endDate, setEndDate] = useState('');
-  const [more, setMore] = useState(false);
+  // Open "More options" when pre-dated so the chosen day is visible.
+  const [more, setMore] = useState(Boolean(prefillDate));
   const [saving, setSaving] = useState(false);
 
   // Prefill when editing.

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { CalendarDays } from 'lucide-react';
 import { getCompletionService } from '@/features/habits/hooks';
 import { useGardenToday, type GardenEntry } from '@/features/garden/use-garden';
 import { PlantAnimated, FireflyField, AnimatedNumber, ScreenEnter } from '@/components/garden/motion';
@@ -137,19 +138,38 @@ export function GardenToday() {
   return (
     <div style={{ padding: '54px 22px 16px' }}>
       <ScreenEnter stagger={40}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
           <div>
             <div className="gd-eyebrow">{dateLabel()}</div>
             <h1 className="gd-h1" style={{ fontSize: 'var(--gd-size-display-md)', marginTop: 2 }}>
               Your <em>garden</em>
             </h1>
           </div>
-          <div
-            role="img"
-            aria-label={`${doneCount} of ${total} tended`}
-            style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: 'var(--gd-bloom)' }}
-          >
-            <AnimatedNumber value={doneCount} />/{total}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 2 }}>
+            <Link
+              href="/calendar"
+              aria-label="Calendar"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 999,
+                border: '1px solid var(--gd-hair-strong)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--gd-cream-soft)',
+                textDecoration: 'none',
+              }}
+            >
+              <CalendarDays size={16} aria-hidden="true" />
+            </Link>
+            <div
+              role="img"
+              aria-label={`${doneCount} of ${total} tended`}
+              style={{ fontFamily: 'var(--gd-font-display)', fontSize: 22, color: 'var(--gd-bloom)', lineHeight: 1 }}
+            >
+              <AnimatedNumber value={doneCount} />/{total}
+            </div>
           </div>
         </div>
 

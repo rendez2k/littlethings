@@ -7,6 +7,14 @@ export const metadata: Metadata = { title: "What's new" };
 
 const RELEASES: Release[] = [
   {
+    version: '0.5.0',
+    date: 'A month at a glance',
+    items: [
+      'A new Calendar view — tap the calendar icon on Today to see every habit laid out across the month, a dot per habit on each day, filled in as you go.',
+      'Tap any day to see what was on, tick things off (or skip them) right there, and add a new habit that starts on that day.',
+    ],
+  },
+  {
     version: '0.4.1',
     date: 'One-offs that wait properly',
     items: [

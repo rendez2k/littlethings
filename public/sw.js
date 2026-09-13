@@ -10,11 +10,11 @@
  *
  * Bump CACHE_VERSION to invalidate old caches on deploy.
  */
-const CACHE_VERSION = 'v12';
+const CACHE_VERSION = 'v13';
 const SHELL_CACHE = `little-things-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `little-things-assets-${CACHE_VERSION}`;
 
-const SHELL_ROUTES = ['/', '/habits', '/goals', '/insights', '/settings', '/offline'];
+const SHELL_ROUTES = ['/', '/habits', '/goals', '/insights', '/calendar', '/settings', '/offline'];
 const PRECACHE_URLS = [
   ...SHELL_ROUTES,
   '/manifest.webmanifest',

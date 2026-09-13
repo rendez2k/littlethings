@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useLook } from '@/components/theme/appearance-provider';
 
@@ -10,7 +11,7 @@ interface PageHeaderProps {
   subtitle?: string;
   /** Optional trailing action, e.g. an add button. */
   action?: ReactNode;
-  /** Garden look only: shows a back link above the title. */
+  /** Shows a back link: an eyebrow above the title in garden, a chevron beside it in classic. */
   backHref?: string;
   backLabel?: string;
   className?: string;
@@ -23,9 +24,20 @@ export function PageHeader({ title, subtitle, action, backHref, backLabel, class
   if (look === 'classic') {
     return (
       <header className={cn('flex items-end justify-between gap-3 pb-4 pt-3', className)}>
-        <div className="min-w-0">
-          <h1 className="text-[1.75rem] font-bold leading-tight tracking-tight text-text">{title}</h1>
-          {subtitle ? <p className="mt-0.5 text-sm text-muted">{subtitle}</p> : null}
+        <div className="flex min-w-0 items-center gap-1">
+          {backHref ? (
+            <Link
+              href={backHref}
+              aria-label={backLabel ? `Back to ${backLabel}` : 'Back'}
+              className="-ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-surface hover:text-text"
+            >
+              <ChevronLeft className="h-6 w-6" aria-hidden="true" />
+            </Link>
+          ) : null}
+          <div className="min-w-0">
+            <h1 className="text-[1.75rem] font-bold leading-tight tracking-tight text-text">{title}</h1>
+            {subtitle ? <p className="mt-0.5 text-sm text-muted">{subtitle}</p> : null}
+          </div>
         </div>
         {action ? <div className="shrink-0 pb-1">{action}</div> : null}
       </header>
