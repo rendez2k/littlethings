@@ -25,6 +25,10 @@ test('main screens have no serious accessibility violations', async ({ page }) =
 
   expect(await scan(page), 'Garden').toEqual([]);
 
+  await page.getByRole('link', { name: 'Calendar' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Calendar' })).toBeVisible();
+  expect(await scan(page), 'Calendar').toEqual([]);
+
   await page.getByRole('link', { name: 'Plants' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'All plants' })).toBeVisible();
   expect(await scan(page), 'Plants').toEqual([]);

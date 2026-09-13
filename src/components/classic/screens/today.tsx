@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CalendarClock, Plus } from 'lucide-react';
+import { CalendarClock, CalendarDays, Plus } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { PlaceholderPanel } from '@/components/ui/placeholder-panel';
 import { ProgressRing } from '@/components/ui/progress-ring';
@@ -103,14 +104,23 @@ export function ClassicToday() {
         title="Today"
         subtitle={dateLabel}
         action={
-          <Button
-            size="sm"
-            aria-label="Add habit"
-            className="h-11 w-11 p-0"
-            onClick={() => openCreate()}
-          >
-            <Plus aria-hidden="true" className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/calendar"
+              aria-label="Calendar"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-muted hover:text-text"
+            >
+              <CalendarDays aria-hidden="true" className="h-5 w-5" />
+            </Link>
+            <Button
+              size="sm"
+              aria-label="Add habit"
+              className="h-11 w-11 p-0"
+              onClick={() => openCreate()}
+            >
+              <Plus aria-hidden="true" className="h-5 w-5" />
+            </Button>
+          </div>
         }
       />
 
