@@ -7,6 +7,13 @@ export const metadata: Metadata = { title: "What's new" };
 
 const RELEASES: Release[] = [
   {
+    version: '0.5.1',
+    date: 'A bigger calendar',
+    items: [
+      'Each date on the Calendar is now a proper box that lists your habits by name — tinted once they’re done — with a + in every day to add a new habit that starts right there.',
+    ],
+  },
+  {
     version: '0.5.0',
     date: 'A month at a glance',
     items: [

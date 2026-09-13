@@ -29,8 +29,8 @@ import {
 } from '@/features/calendar/month';
 import { fromDateKey, monthKeyOf, todayKey, type DateKey } from '@/lib/dates';
 
-/** Dots shown per day before collapsing the rest into a "+n". */
-const MAX_DOTS = 4;
+/** Habit labels shown per day before collapsing the rest into "+n more". */
+const MAX_LABELS = 3;
 
 function longDate(key: DateKey): string {
   return fromDateKey(key).toLocaleDateString(undefined, {
@@ -149,6 +149,7 @@ export function CalendarScreen() {
           selected={selected}
           tint={tint}
           onSelect={setSelected}
+          onAdd={addOn}
         />
 
         <MonthTally weeks={weeks} days={days} today={today} />
@@ -225,6 +226,7 @@ function MonthGrid({
   selected,
   tint,
   onSelect,
+  onAdd,
 }: {
   weeks: ReturnType<typeof monthGrid>;
   days: Map<DateKey, DaySummary>;
@@ -232,25 +234,26 @@ function MonthGrid({
   selected: DateKey;
   tint: (habit: Habit) => HabitTint;
   onSelect: (date: DateKey) => void;
+  onAdd: (date: DateKey) => void;
 }) {
   const headers = (weeks[0] ?? []).map((cell) =>
-    fromDateKey(cell.date).toLocaleDateString(undefined, { weekday: 'narrow' }),
+    fromDateKey(cell.date).toLocaleDateString(undefined, { weekday: 'short' }),
   );
 
   return (
-    <div className="rounded-card border border-border bg-surface p-2 shadow-card">
+    <div className="rounded-card border border-border bg-surface p-1.5 shadow-card sm:p-2">
       <div className="mb-1 grid grid-cols-7">
         {headers.map((h, i) => (
           <div
             key={i}
             aria-hidden="true"
-            className="text-center text-[0.65rem] font-medium uppercase text-muted"
+            className="truncate text-center text-[0.6rem] font-medium uppercase tracking-wide text-muted sm:text-[0.7rem]"
           >
             {h}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-y-1">
+      <div className="grid grid-cols-7 gap-[3px] sm:gap-1">
         {weeks.flat().map((cell) => {
           if (!cell.inMonth) return <div key={cell.date} aria-hidden="true" />;
           const day = days.get(cell.date);
@@ -265,42 +268,57 @@ function MonthGrid({
               : entries.length > 0
                 ? 'nothing due'
                 : 'nothing scheduled';
-          const shown = entries.slice(0, MAX_DOTS);
+          const shown = entries.slice(0, MAX_LABELS);
           const extra = entries.length - shown.length;
+          const dateLabel = longDate(cell.date);
 
+          // Each date is a box: the day + its habits select the day (for the
+          // panel below), and a "+" at the foot adds a habit starting that day.
           return (
-            <button
+            <div
               key={cell.date}
-              type="button"
-              data-date={cell.date}
-              aria-label={`${longDate(cell.date)}: ${summary}`}
-              aria-pressed={isSelected}
-              onClick={() => onSelect(cell.date)}
               className={cn(
-                'flex min-h-[3.25rem] flex-col items-center rounded-lg pb-1 pt-1 transition motion-safe:active:scale-95',
-                isSelected ? 'bg-primary-soft' : 'hover:bg-background',
+                'flex min-h-[5rem] flex-col overflow-hidden rounded-lg border transition sm:min-h-[6rem]',
+                isSelected ? 'border-primary bg-primary-soft' : 'border-border/60 bg-background',
               )}
             >
-              <span
-                className={cn(
-                  'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums',
-                  isToday ? 'bg-primary text-primary-foreground' : future ? 'text-muted' : 'text-text',
-                )}
+              <button
+                type="button"
+                data-date={cell.date}
+                aria-label={`${dateLabel}: ${summary}`}
+                aria-pressed={isSelected}
+                onClick={() => onSelect(cell.date)}
+                className="flex min-w-0 flex-1 flex-col items-stretch px-[3px] pt-[3px] text-left sm:px-1 sm:pt-1"
               >
-                {fromDateKey(cell.date).getDate()}
-              </span>
-              <span
-                aria-hidden="true"
-                className="mt-1 flex h-3 items-center justify-center gap-[3px] px-0.5"
+                <span
+                  className={cn(
+                    'flex h-5 w-5 items-center justify-center rounded-full text-[0.7rem] font-semibold tabular-nums sm:text-xs',
+                    isToday ? 'bg-primary text-primary-foreground' : future ? 'text-muted' : 'text-text',
+                  )}
+                >
+                  {fromDateKey(cell.date).getDate()}
+                </span>
+                <span aria-hidden="true" className="mt-[3px] flex flex-col gap-[2px]">
+                  {shown.map((e) => (
+                    <HabitLabel key={e.habit.id} entry={e} future={future} tint={tint(e.habit)} />
+                  ))}
+                  {extra > 0 ? (
+                    <span className="px-[3px] text-[0.55rem] font-medium leading-tight text-muted sm:text-[0.65rem]">
+                      +{extra}
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+              <button
+                type="button"
+                data-add-date={cell.date}
+                aria-label={`Add a habit on ${dateLabel}`}
+                onClick={() => onAdd(cell.date)}
+                className="mx-[3px] mb-[3px] flex h-6 shrink-0 items-center justify-center rounded-md text-muted/70 transition hover:bg-surface hover:text-text sm:mx-1 sm:mb-1"
               >
-                {shown.map((e) => (
-                  <Dot key={e.habit.id} entry={e} future={future} accent={tint(e.habit).accent} />
-                ))}
-                {extra > 0 ? (
-                  <span className="text-[9px] font-medium leading-none text-muted">+{extra}</span>
-                ) : null}
-              </span>
-            </button>
+                <Plus aria-hidden="true" className="h-3.5 w-3.5" />
+              </button>
+            </div>
           );
         })}
       </div>
@@ -309,21 +327,28 @@ function MonthGrid({
 }
 
 /**
- * One habit on one day: filled when done, hollow when still open, faint when
- * nothing was due (a future day, or a flexible habit's unlogged past day).
+ * One habit on one day, as a small labelled chip: a colour bar plus the name,
+ * tinted when done, plain when still open, faint when nothing was due (a
+ * future day, or a flexible habit's unlogged past day).
  */
-function Dot({ entry, future, accent }: { entry: DayEntry; future: boolean; accent: string }) {
+function HabitLabel({ entry, future, tint }: { entry: DayEntry; future: boolean; tint: HabitTint }) {
   const done = entry.status === 'complete' || entry.status === 'skipped';
   const faint = future || isOpenFlexibleDay(entry);
   return (
     <span
-      className="h-[5px] w-[5px] shrink-0 rounded-full"
-      style={{
-        border: `1.5px solid ${accent}`,
-        backgroundColor: done ? accent : 'transparent',
-        opacity: entry.status === 'skipped' ? 0.55 : faint ? 0.45 : 1,
-      }}
-    />
+      className="flex min-w-0 items-center gap-[3px] rounded-[3px] px-[3px] py-[1px] text-[0.55rem] leading-tight sm:text-[0.7rem]"
+      style={
+        done
+          ? { backgroundColor: tint.soft, color: tint.accent, opacity: entry.status === 'skipped' ? 0.7 : 1 }
+          : { color: 'rgb(var(--color-text))', opacity: faint ? 0.55 : 0.85 }
+      }
+    >
+      <span
+        className="h-[0.6rem] w-[3px] shrink-0 rounded-full"
+        style={{ backgroundColor: tint.accent }}
+      />
+      <span className="truncate">{entry.habit.name}</span>
+    </span>
   );
 }
 
