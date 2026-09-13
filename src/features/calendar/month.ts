@@ -6,6 +6,7 @@
 import type { DateKey, WeekStart } from '@/lib/dates';
 import { addDays, daysInMonth, startOfMonthKey, startOfWeekKey } from '@/lib/dates';
 import type { Habit } from '@/features/habits/schemas';
+import { isFlexibleSchedule } from '@/features/habits/schedule';
 import type { Completion } from '@/features/completions/schemas';
 import { buildDayView, type DayEntry } from '@/features/completions/day-view';
 
@@ -50,7 +51,18 @@ export interface DaySummary {
   entries: DayEntry[];
   /** Entries that are complete or skipped. */
   done: number;
+  /** Entries that count as an opportunity that day (see `isOpenFlexibleDay`). */
   total: number;
+}
+
+/**
+ * A flexible habit (times per week/month) is available every day but judged
+ * per period — a past day it wasn't logged on is simply "not this day", never
+ * a miss. Such entries stay listed (you can still log them) but don't count
+ * toward the day's or month's tally.
+ */
+export function isOpenFlexibleDay(entry: DayEntry): boolean {
+  return entry.status === 'missed' && isFlexibleSchedule(entry.habit.schedule);
 }
 
 /** Non-tombstoned completions grouped by their date key. */
@@ -84,7 +96,7 @@ export function summariseDays(
       date,
       entries: view.entries,
       done: view.summary.completed + view.summary.skipped,
-      total: view.summary.total,
+      total: view.entries.filter((e) => !isOpenFlexibleDay(e)).length,
     });
   }
   return out;

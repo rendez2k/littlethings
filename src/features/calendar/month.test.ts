@@ -93,6 +93,23 @@ describe('summariseDays', () => {
     expect(days.get('2026-09-20')!.entries[0]!.status).toBe('future');
   });
 
+  it('never counts an unlogged past day against a flexible habit', () => {
+    const weekly = habit({ id: 'w1', schedule: { type: 'times_per_week', timesPerWeek: 3 } });
+    const days = summariseDays(
+      ['2026-09-10', '2026-09-11', '2026-09-13'],
+      [weekly],
+      groupCompletionsByDate([completion({ habitId: 'w1', date: '2026-09-10' })]),
+      '2026-09-13',
+      new Set(),
+    );
+    // Logged that day → counts. Unlogged past day → still listed, not an
+    // opportunity. Today → an open opportunity as usual.
+    expect(days.get('2026-09-10')).toMatchObject({ done: 1, total: 1 });
+    expect(days.get('2026-09-11')).toMatchObject({ done: 0, total: 0 });
+    expect(days.get('2026-09-11')!.entries).toHaveLength(1);
+    expect(days.get('2026-09-13')).toMatchObject({ done: 0, total: 1 });
+  });
+
   it('shows a one-off only on the day it was done, or waiting on today', () => {
     const once = habit({ id: 'o1', schedule: { type: 'once' }, startDate: '2026-09-01' });
     const days = summariseDays(

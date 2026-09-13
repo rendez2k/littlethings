@@ -21,6 +21,7 @@ import { useAppSettings } from '@/features/settings/hooks';
 import { everResolvedHabitIds, type DayEntry } from '@/features/completions/day-view';
 import {
   groupCompletionsByDate,
+  isOpenFlexibleDay,
   monthGrid,
   shiftMonth,
   summariseDays,
@@ -257,10 +258,13 @@ function MonthGrid({
           const isToday = cell.date === today;
           const isSelected = cell.date === selected;
           const future = cell.date > today;
+          const total = day?.total ?? 0;
           const summary =
-            entries.length === 0
-              ? 'nothing scheduled'
-              : `${day?.done ?? 0} of ${entries.length} done`;
+            total > 0
+              ? `${day?.done ?? 0} of ${total} done`
+              : entries.length > 0
+                ? 'nothing due'
+                : 'nothing scheduled';
           const shown = entries.slice(0, MAX_DOTS);
           const extra = entries.length - shown.length;
 
@@ -304,16 +308,20 @@ function MonthGrid({
   );
 }
 
-/** One habit on one day: filled when done, hollow when still open. */
+/**
+ * One habit on one day: filled when done, hollow when still open, faint when
+ * nothing was due (a future day, or a flexible habit's unlogged past day).
+ */
 function Dot({ entry, future, accent }: { entry: DayEntry; future: boolean; accent: string }) {
   const done = entry.status === 'complete' || entry.status === 'skipped';
+  const faint = future || isOpenFlexibleDay(entry);
   return (
     <span
       className="h-[5px] w-[5px] shrink-0 rounded-full"
       style={{
         border: `1.5px solid ${accent}`,
         backgroundColor: done ? accent : 'transparent',
-        opacity: entry.status === 'skipped' ? 0.55 : future ? 0.45 : 1,
+        opacity: entry.status === 'skipped' ? 0.55 : faint ? 0.45 : 1,
       }}
     />
   );
@@ -371,9 +379,9 @@ function DayPanel({
         <h2 id="calendar-day-heading" className={cn('min-w-0 truncate', headingClass)}>
           {isToday ? 'Today' : longDate(date)}
         </h2>
-        {entries.length > 0 ? (
+        {summary && summary.total > 0 ? (
           <span className="shrink-0 text-xs text-muted">
-            {summary?.done ?? 0} of {entries.length} done
+            {summary.done} of {summary.total} done
           </span>
         ) : null}
       </div>
@@ -416,7 +424,9 @@ function statusLine(entry: DayEntry, future: boolean): string {
     case 'skipped':
       return 'Skipped — the streak holds';
     case 'missed':
-      return 'Not logged';
+      // A flexible habit is judged per week/month, so an unlogged day isn't a
+      // miss — just show what it is, and it can still be logged here.
+      return isOpenFlexibleDay(entry) ? scheduleLabel(entry.habit.schedule) : 'Not logged';
     default:
       return future ? `Upcoming · ${scheduleLabel(entry.habit.schedule)}` : scheduleLabel(entry.habit.schedule);
   }
@@ -437,6 +447,8 @@ function DayRow({
   const Icon = getHabitIcon(habit.icon);
   const future = date > today;
   const done = status === 'complete' || status === 'skipped';
+  // Skip only makes sense where something was due that day.
+  const skippable = !future && !done && !isOpenFlexibleDay(entry);
   const service = getCompletionService();
 
   return (
@@ -477,7 +489,7 @@ function DayRow({
           </button>
         ) : (
           <>
-            {!future && !done ? (
+            {skippable ? (
               <button
                 type="button"
                 aria-label={`Skip ${habit.name}`}
