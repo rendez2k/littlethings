@@ -50,7 +50,8 @@ test('add a habit from the calendar, dated to the selected day', async ({ page }
   await expect(page.getByRole('heading', { level: 1, name: 'Calendar' })).toBeVisible();
   await expect(page.getByText(/Nothing scheduled/)).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add habit' }).click();
+  // Every date box has its own "+" that opens the editor dated to that day.
+  await page.locator(`[data-add-date="${todayKey()}"]`).click();
   await expect(page.getByRole('heading', { name: /Plant a new/ })).toBeVisible();
   // The editor opens pre-dated to the selected day, with the date in view.
   await expect(page.getByLabel('Start date')).toHaveValue(todayKey());
